@@ -25,7 +25,10 @@ This lack of information means there is one more step between relief and the dis
 
 Social media can help with some of this. Mobile communication usually outlives landlines and other modes of communication, and in recent disasters, the volume of messages (SMSes and Tweets) sent from the disaster site is enormous. Effective use of this information requires immediately processing large amounts of natural text in a short amount of time. Currently, this means that Red Cross (or some other relief organization) workers have to sift through thousands of Tweets, SMSes, and calls, to extract useful information that will help them direct or carry out on-the-ground relief efforts.
 
-NLP (Natural Language Processing) is one way to help with this processing. More general machine learning methods can help to geolocate tweets based on text and the social graph. The solution that we are developing as tweedr is a pipeline that can process a stream of text (along with metadata) and produce useful annotations on top of that text,
+NLP (Natural Language Processing) is one way to help with this processing. More general machine learning (ML) methods can help to geolocate tweets based on text and the social graph. The solution that we are developing as "tweedr" is primarily an API for adding ML-powered annotations, as well as a thin layer for viewing those annotations:
+
+1. A pipeline that can process a stream of text (along with metadata) and produce useful annotations on top of that text.
+2. An interface for effectively viewing these annotations in aggregate.
 
  
 ## The impact

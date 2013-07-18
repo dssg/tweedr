@@ -81,6 +81,34 @@ For this type of data, our immediate goal is to replicate human annotations via 
     - The human annotations are valuable, but having grounded data like Red Cross / FEMA damage reports might help us estimate how seriously to take our inferred mapping between Twitter and the real world.
 
 
+## Contributing
+
+To get started:
+
+    git clone https://github.com/dssg/tweedr.git
+    cd tweedr
+    python setup.py develop
+
+### Standards
+
+1. Python code should adhere to [PEP-8](http://www.python.org/dev/peps/pep-0008/). Most importantly, this means:
+
+    > Use 4 spaces per indentation level.
+
+    There are lots of other nice things about PEP-8, but that's the most important one.
+
+    The only exceptions to this are `E501` and `E128`.
+
+    Run `./pep8.sh` in the base directory to check if your working directory passes PEP-8.
+    No output means you're good to go.
+
+2. No trailing whitespace.
+
+    Trailing whitespace is almost always ignored, but it is non-deterministic, and can make commit diffs hard to read quickly.
+
+3. Python 2.7 is recommended.
+
+
 ## License
 
 **To be determined.**

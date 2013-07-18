@@ -15,8 +15,8 @@ class Trainer(crfsuite.Trainer):
         logger.debug('Trainer.message: %s', s)
 
     def append_raw(self, features_seq, labels):
-        # len(labels) = len(data) = length of sentence / sequence
-        # labels is a tuple of strings, data is an tuple/list of lists of strings.
+        # len(labels) = len(features_seq) = length of sentence / sequence
+        # labels is a tuple of strings, features_seq is an tuple/list of variable-length lists of strings.
         # this just wraps all the data / labels with crfsuite types
         items = crfsuite.ItemSequence()
         for features in features_seq:

@@ -99,14 +99,19 @@ To get started:
 
     The only exceptions to this are `E501` and `E128`.
 
-    Run `./pep8.sh` in the base directory to check if your working directory passes PEP-8.
-    No output means you're good to go.
+    The PEP-8 check is incorporated as a unit test, which just runs `pep8 . --ignore=E128,E501` in the base directory.
 
 2. No trailing whitespace.
 
     Trailing whitespace is almost always ignored, but it is non-deterministic, and can make commit diffs hard to read quickly.
 
 3. Python 2.7 is recommended.
+
+4. Testing
+
+    [![Build Status](https://travis-ci.org/dssg/tweedr.png?branch=master)](https://travis-ci.org/dssg/tweedr)
+
+    Run `python setup.py test` in the base directory.
 
 
 ## License

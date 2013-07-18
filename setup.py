@@ -17,4 +17,6 @@ setup(
         'console_scripts': [
         ],
     },
+    tests_require=['pep8'],
+    test_suite='tests',
 )

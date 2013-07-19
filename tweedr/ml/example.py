@@ -1,5 +1,5 @@
 import argparse
-from colorama import Fore, Style
+from colorama import Fore
 
 from tweedr.lib import flatten, bifurcate, Counts
 from tweedr.lib.text import gloss
@@ -13,13 +13,13 @@ def stringify(o):
 
 
 def main(test_proportion, max_data, model_path):
-    # print >> sys.stderr, 'Tweet count started.'
-    print 'There are %d labels in the database.' % DBSession.query(Label).count()
-    print 'There are %d tokenized labels in the database.' % DBSession.query(TokenizedLabel).count()
+    print '%d labels' % DBSession.query(Label).count()
+    for label in DBSession.query(Label):
+        print '  %s = %s' % (label.id, label.text)
 
     tokenized_labels = DBSession.query(TokenizedLabel).limit(max_data).all()
-
     test, train = bifurcate(tokenized_labels, test_proportion, shuffle=True)
+    print 'Training on %d, testing on %d' % (len(train), len(test))
 
     trainer = crf.Trainer()
 
@@ -64,10 +64,10 @@ def main(test_proportion, max_data, model_path):
                     counts.false_negatives += 1
 
             if gold_label == 'None':
-                if predicted_label != gold_label:
-                    counts.false_positives += 1
-                else:
+                if predicted_label == gold_label:
                     counts.true_negatives += 1
+                else:
+                    counts.false_positives += 1
 
             # if gold_label != 'None' and predicted_label != 'None':
             #     # non_null_partial_matches:
@@ -90,6 +90,8 @@ def main(test_proportion, max_data, model_path):
     print 'Recall: %0.4f' % (
         float(totals.true_positives) /
         (totals.true_positives + totals.false_negatives))
+
+    # TODO: list top tokens for each label type
 
 
 if __name__ == '__main__':

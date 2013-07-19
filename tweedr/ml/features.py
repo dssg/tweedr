@@ -35,6 +35,10 @@ def capitalized(document):
     return [['CAPITALIZED'] if token[0].isupper() else [] for token in document]
 
 
+def numeric(document):
+    return [['NUMERIC'] if token.isdigit() else [] for token in document]
+
+
 def unique(document):
     seen = {}
     features = []
@@ -50,7 +54,8 @@ all_feature_functions = [
     ctrigrams,
     plural,
     capitalized,
-    unique
+    numeric,
+    unique,
 ]
 
 

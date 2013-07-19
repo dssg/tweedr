@@ -4,6 +4,7 @@ import crfsuite
 import logging
 
 logger = logging.getLogger(__name__)
+version = crfsuite.version()
 
 
 class Trainer(crfsuite.Trainer):
@@ -56,7 +57,11 @@ class Tagger(crfsuite.Tagger):
         self.open(model_path)
 
     def tag(self, data):
-        # Obtain the label sequence predicted by the tagger.
+        '''
+        Obtain the label sequence predicted by the tagger.
+
+        This returns a tuple of strings.
+        '''
         self.set(data)
         return self.viterbi()
 

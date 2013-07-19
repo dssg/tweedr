@@ -5,6 +5,7 @@ setup(
     version='0.0.2',
     packages=['tweedr'],
     install_requires=[
+        'colorama',
         'mysql-python',
         'scikit-learn',
         'sqlalchemy',

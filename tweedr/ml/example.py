@@ -1,18 +1,22 @@
-import re
-import sys
 import argparse
+from colorama import Fore, Style
 
-from tweedr.lib import flatten, bifurcate
+from tweedr.lib import flatten, bifurcate, Counts
+from tweedr.lib.text import gloss
 from tweedr.models import DBSession, TokenizedLabel, Label
 from tweedr.ml import crf
 from tweedr.ml.features import all_feature_functions
 
-print >> sys.stderr, 'Tweet count started.'
-print 'There are %d labels in the database.' % DBSession.query(Label).count()
-print 'There are %d tokenized labels in the database.' % DBSession.query(TokenizedLabel).count()
+
+def stringify(o):
+    return unicode(o).encode('utf8')
 
 
 def main(test_proportion, max_data, model_path):
+    # print >> sys.stderr, 'Tweet count started.'
+    print 'There are %d labels in the database.' % DBSession.query(Label).count()
+    print 'There are %d tokenized labels in the database.' % DBSession.query(TokenizedLabel).count()
+
     tokenized_labels = DBSession.query(TokenizedLabel).limit(max_data).all()
 
     test, train = bifurcate(tokenized_labels, test_proportion, shuffle=True)
@@ -23,56 +27,80 @@ def main(test_proportion, max_data, model_path):
     # <TokenizedLabel dssg_id=23346 token_start=13 token_end=16
     #    tweet=Tornado Kills 89 in Missouri. http://t.co/IEuBas5 token_type=i18 token= 89 id=5>
     for tokenized_label in train:
-        label_start, label_end = (tokenized_label.token_start, tokenized_label.token_end)
-
-        text = tokenized_label.tweet
-        token_spans_tokens = [(m.span(), m.group(0)) for m in re.finditer('\S+', text)]
-        # token_spans, tokens = zip(*token_spans_tokens)
-
-        tokens = []
-        labels = []
-        for (token_start, token_end), token in token_spans_tokens:
-            # encode unicode token (database output) as string
-            tokens.append(token.encode('utf8'))
-            # we want to determine if this particular token in the original tweet overlaps
-            #   with any portion of the selected label (label_span)
-            if label_start <= token_start <= label_end or label_start <= token_end <= label_end:
-                labels.append(str(tokenized_label.token_type))
-            else:
-                labels.append('NA')
-
-        # produce and then flatten all the features
+        tokens = map(stringify, tokenized_label.tokens)
+        labels = map(stringify, tokenized_label.labels)
+        # produce all the features and then flatten them
         data = map(flatten, zip(*[feature_function(tokens) for feature_function in all_feature_functions]))
+
         trainer.append_raw(data, labels)
 
     trainer.save(model_path)
 
     print 'Trainer saved to ' + model_path
 
+    totals = Counts()
+
     tagger = crf.Tagger(model_path)
     for tokenized_label in test:
-        print 'Tagging:', tokenized_label
+        # print 'Tagging:', tokenized_label
 
-        tokens = re.findall('\S+', tokenized_label.tweet.encode('utf8'))
-        print tokens
-
+        tokens = map(stringify, tokenized_label.tokens)
+        gold_labels = map(stringify, tokenized_label.labels)
         data = map(flatten, zip(*[feature_function(tokens) for feature_function in all_feature_functions]))
-        predicted_labels = tagger.tag_raw(data)
-        print 'Predicted:'
-        print predicted_labels
-        # tokens = [item[0].attr for item in data]
+
+        predicted_labels = list(tagger.tag_raw(data))
+        alignments = zip(tokens, gold_labels, predicted_labels)
+        print gloss(alignments,
+            prefixes=(Fore.WHITE, Fore.YELLOW, Fore.BLUE),
+            postfixes=(Fore.RESET, Fore.RESET, Fore.RESET))
+
+        counts = Counts()
+        for gold_label, predicted_label in zip(gold_labels, predicted_labels):
+            counts.comparisons += 1
+            if gold_label != 'None':
+                if predicted_label == gold_label:
+                    counts.true_positives += 1
+                else:
+                    counts.false_negatives += 1
+
+            if gold_label == 'None':
+                if predicted_label != gold_label:
+                    counts.false_positives += 1
+                else:
+                    counts.true_negatives += 1
+
+            # if gold_label != 'None' and predicted_label != 'None':
+            #     # non_null_partial_matches:
+            #     #   the number of items that anything but None for both gold and predicted
+            #     counts.non_null_partial_matches += 1
+            #     if gold_label == predicted_label:
+            #         counts.non_null_exact_matches += 1
+            # if gold_label == predicted_label:
+            #     counts.exact_matches += 1
+
+        totals.add(counts)
+
+        print '-' * 80
+
+    print totals
+
+    print 'Precision: %0.4f' % (
+        float(totals.true_positives) /
+        (totals.true_positives + totals.false_positives))
+    print 'Recall: %0.4f' % (
+        float(totals.true_positives) /
+        (totals.true_positives + totals.false_negatives))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train CRFSuite on data from the QCRI MySQL database')
     parser.add_argument('--test-proportion', type=float, default=0.1, help='The proportion of the total data to train on')
     parser.add_argument('--max-data', type=int, default=1000, help='Maximum data points to train and test on')
-    parser.add_argument('--model-path', default='crf.model')
+    parser.add_argument('--model-path', default='/tmp/crfsuite-ml-example.model')
     parser.add_argument('--crfsuite-version', action='store_true', help='Print the active crfsuite version')
     opts = parser.parse_args()
 
     if opts.crfsuite_version:
-        import crfsuite
-        print 'CRFSuite v%s' % crfsuite.version()
+        print 'CRFSuite v%s' % crf.version
     else:
         main(opts.test_proportion, opts.max_data, opts.model_path)

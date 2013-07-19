@@ -1,7 +1,8 @@
 import os
+from tweedr.lib.text import token_re
 
 from sqlalchemy import create_engine, Table, MetaData
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import declarative_base, DeferredReflection
 from sqlalchemy.orm import sessionmaker as sessionmakermaker
 
 connection_string = 'mysql+mysqldb://%(MYSQL_USER)s:%(MYSQL_PASS)s@%(MYSQL_HOST)s/%(MYSQL_DATABASE)s' % os.environ
@@ -29,13 +30,40 @@ class BaseMixin(object):
 Base = declarative_base(metadata=metadata, cls=BaseMixin)
 
 
-class Label(Base):
-    __table__ = Table('labels', metadata, autoload=True)
+class Label(DeferredReflection, Base):
+    # __table__ = Table('labels', metadata, autoload=True)
+    __tablename__ = 'labels'
 
 
-class TokenizedLabel(Base):
-    __table__ = Table('tokenized_labels', metadata, autoload=True)
+class TokenizedLabel(DeferredReflection, Base):
+    # __table__ = Table('tokenized_labels', metadata, autoload=True)
+    __tablename__ = 'tokenized_labels'
+
+    @property
+    def tokens(self):
+        return token_re.findall(self.tweet)
+
+    @property
+    def labels(self):
+        labels = []
+        label_start, label_end = self.token_start, self.token_end
+        for match in token_re.finditer(self.tweet):
+            token_start, token_end = match.span()
+            # token = match.group(0)
+            # we want to determine if this particular token in the original tweet overlaps
+            #   with any portion of the selected label (label_span)
+            if label_start <= token_start <= label_end or label_start <= token_end <= label_end:
+                labels.append(self.token_type)
+            else:
+                # should I let the user set the NA label?
+                labels.append(None)
+        return labels
 
 
-class Tweet(Base):
-    __table__ = Table('tweets', metadata, autoload=True)
+class Tweet(DeferredReflection, Base):
+    # __table__ = Table('tweets', metadata, autoload=True)
+    __tablename__ = 'tweets'
+
+# DeferredReflection is just as slow as the __table__(autoload=True) calls.
+# I thought it might be faster, but not really.
+DeferredReflection.prepare(engine)

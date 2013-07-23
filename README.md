@@ -89,6 +89,10 @@ To get started:
     cd tweedr
     python setup.py develop
 
+Some tasks require external resources, which are downloaded separately:
+
+    python setup.py install_data
+
 ### Standards
 
 1. Python code should adhere to [PEP-8](http://www.python.org/dev/peps/pep-0008/). Most importantly, this means:

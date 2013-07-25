@@ -1,7 +1,7 @@
 import os
 from tweedr.lib.text import token_re
 
-from sqlalchemy import create_engine, Table, MetaData
+from sqlalchemy import create_engine, MetaData  # , Table
 from sqlalchemy.ext.declarative import declarative_base, DeferredReflection
 from sqlalchemy.orm import sessionmaker as sessionmakermaker
 
@@ -41,7 +41,7 @@ class TokenizedLabel(DeferredReflection, Base):
 
     @property
     def tokens(self):
-        return token_re.findall(self.tweet)
+        return token_re.findall(unicode(self.tweet).encode('utf8'))
 
     @property
     def labels(self):
@@ -57,7 +57,7 @@ class TokenizedLabel(DeferredReflection, Base):
             else:
                 # should I let the user set the NA label?
                 labels.append(None)
-        return labels
+        return [unicode(label).encode('utf8') for label in labels]
 
 
 class Tweet(DeferredReflection, Base):

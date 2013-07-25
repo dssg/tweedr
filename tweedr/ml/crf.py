@@ -34,12 +34,15 @@ class Trainer(crfsuite.Trainer):
         self.append(items, tuple(labels), 0)
 
     def save(self, model_path):
-        # Use L2-regularized SGD and 1st-order dyad features.
+        # Trainer.select(algorithm, type): Initialize the training algorithm and set type of graphical model
+        # lbfgs is the default algorithm
+        # l2sgd is L2-regularized SGD
+        # crf1d is 1st-order dyad features.
         self.select('l2sgd', 'crf1d')
 
-        # This demonstrates how to list parameters and obtain their values.
-
         # Set the coefficient for L2 regularization to 0.1
+        # potential values change based on algorithm previously selected
+        # See http://www.chokkan.org/software/crfsuite/manual.html
         self.set('c2', '0.1')
 
         # Start training; the training process will invoke trainer.message()

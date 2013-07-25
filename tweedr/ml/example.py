@@ -8,10 +8,6 @@ from tweedr.ml import crf
 from tweedr.ml.features import all_feature_functions
 
 
-def stringify(o):
-    return unicode(o).encode('utf8')
-
-
 def main(test_proportion, max_data, model_path):
     print '%d labels' % DBSession.query(Label).count()
     for label in DBSession.query(Label):
@@ -27,8 +23,8 @@ def main(test_proportion, max_data, model_path):
     # <TokenizedLabel dssg_id=23346 token_start=13 token_end=16
     #    tweet=Tornado Kills 89 in Missouri. http://t.co/IEuBas5 token_type=i18 token= 89 id=5>
     for tokenized_label in train:
-        tokens = map(stringify, tokenized_label.tokens)
-        labels = map(stringify, tokenized_label.labels)
+        tokens = tokenized_label.tokens
+        labels = tokenized_label.labels
         # produce all the features and then flatten them
         data = map(flatten, zip(*[feature_function(tokens) for feature_function in all_feature_functions]))
 
@@ -36,7 +32,7 @@ def main(test_proportion, max_data, model_path):
 
     trainer.save(model_path)
 
-    print 'Trainer saved to ' + model_path
+    print 'CRF model saved to ' + model_path
 
     totals = Counts()
 
@@ -44,8 +40,8 @@ def main(test_proportion, max_data, model_path):
     for tokenized_label in test:
         # print 'Tagging:', tokenized_label
 
-        tokens = map(stringify, tokenized_label.tokens)
-        gold_labels = map(stringify, tokenized_label.labels)
+        tokens = tokenized_label.tokens
+        gold_labels = tokenized_label.labels
         data = map(flatten, zip(*[feature_function(tokens) for feature_function in all_feature_functions]))
 
         predicted_labels = list(tagger.tag_raw(data))

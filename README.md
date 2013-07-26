@@ -117,6 +117,53 @@ Some tasks require external resources, which are downloaded separately:
     Run `python setup.py test` in the base directory.
 
 
+## Development environment
+
+Portions of this codebase expect a few environment variables or config files:
+
+`~/.mrjob.conf`, for MRJob (for Elastic Map Reduce):
+
+    runners:
+      emr:
+        aws_region: us-west-2
+        aws_access_key_id: AKAYOURACCESSKEY
+        aws_secret_access_key: nQ1UFZEMoVH5k02GefjuwxSpBY4AysJr6hIKaiC8
+        ec2_key_pair: dssg-admin
+        ec2_key_pair_file: /home/yer_name/.ssh/id_dssg_rsa
+
+`~/credentials.json`, for `gem install elastic-mapreduce`:
+
+    {
+      "access-id": "AKAYOURACCESSKEY",
+      "private-key": "nQ1UFZEMoVH5k02GefjuwxSpBY4AysJr6hIKaiC8",
+      "key-pair": "dssg-admin",
+      "key-pair-file": "/home/yer_name/.ssh/id_dssg_rsa",
+      "region": "us-west-2"
+    }
+
+`~/.boto`, for boto:
+
+    [Credentials]
+    aws_access_key_id = AKAYOURACCESSKEY
+    aws_secret_access_key = nQ1UFZEMoVH5k02GefjuwxSpBY4AysJr6hIKaiC8
+
+    [Boto]
+    debug = 0
+    num_retries = 10
+
+Environment variables, alternatively, for boto:
+
+    export AWS_ACCESS_KEY_ID=AKAYOURACCESSKEY
+    export AWS_SECRET_ACCESS_KEY=nQ1UFZEMoVH5k02GefjuwxSpBY4AysJr6hIKaiC8
+
+And for basic MySQL RDS connectivity:
+
+    export MYSQL_HOST="qcri.abcdefghijkl.us-west-2.rds.amazonaws.com"
+    export MYSQL_USER="yourusername"
+    export MYSQL_PASS="andthepassword"
+    export MYSQL_DATABASE="finallythedatabasename"
+
+
 ## License
 
 **To be determined.**

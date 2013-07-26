@@ -1,7 +1,7 @@
 # each feature function takes an N-long document (list of strings) and returns an N-long list
 #   of lists/tuples of features (i.e., strings) to add to the total data for that sentence.
 #   often the list will contain lists that are 1-long
-
+import lexicon_list
 
 def spacer(xs):
     return [' '.join(xs)]
@@ -28,6 +28,14 @@ def ctrigrams(document):
 
 def plural(document):
     return [['PLURAL'] if token.endswith('s') else [] for token in document]
+
+
+def is_transportation(document):
+    return [['TRANSPORTATION'] if token in transportation else [] for token in document]
+
+
+def is_building(document):
+    return [['BUILDING'] if token in buildings else [] for token in document]
 
 
 def capitalized(document):

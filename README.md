@@ -2,8 +2,7 @@
 
 Tweedr aims to develop machine learning and natural language processing tools to analyze social media created in response to a disaster. By enabling disaster relief agencies (e.g., [Red Cross](http://www.redcross.org/), [UN](http://www.un.org/en/), [FEMA](http://www.fema.gov/)) to quickly assimilate information coming in from various sources (generally, free text without a common format), so that they know what's damaged and where, this tool can help expedite on-site efforts.
 
-Tweedr is a [Data Science for Social Good](http://dssg.io/) 2013 project.
-
+Tweedr is a [Data Science for Social Good](http://dssg.io/) 2013 project, through a partnership with the Qatar Computational Research Institute.
 
 
 ## The problem: a flood

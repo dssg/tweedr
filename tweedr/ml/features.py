@@ -1,7 +1,6 @@
 # each feature function takes an N-long document (list of strings) and returns an N-long list
 #   of lists/tuples of features (i.e., strings) to add to the total data for that sentence.
 #   often the list will contain lists that are 1-long
-from tweedr.lib import flatten
 
 
 def spacer(xs):
@@ -47,6 +46,7 @@ def unique(document):
         seen[token] = 1
     return features
 
+
 all_feature_functions = [
     unigrams,
     rbigrams,
@@ -59,26 +59,33 @@ all_feature_functions = [
 ]
 
 
+def featurize(tokens, feature_functions):
+    '''Take a N-long list of strings (natural text), apply each feature function,
+    and then unzip (transpose) and flatten so that we get a N-long list of
+    arbitrarily-long lists of strings.
+    '''
+    # feature_sets = []
+    # for feature_function in feature_functions:
+    #     feature_set = feature_function(document)
+    #     feature_sets.append(feature_set)
+    # tokens_feature_sets = zip(*feature_sets)
+    # tokens_features = map(flatten, tokens_feature_sets)
+
+    # or replace the previous six lines with:
+    features_groups = [feature_function(tokens) for feature_function in feature_functions]
+    return [sum(tokens_features_group, []) for tokens_features_group in zip(*features_groups)]
+
+
 def main():
     # example usage:
     # echo "The Fulton County Grand Jury said Friday an investigation of Atlanta's recent primary election produced no evidence that any irregularities took place." | python features.py
-    import re
     import sys
+    from tweedr.lib.text import token_re
     for line in sys.stdin:
-        # document is just a list of tokens
-        document = re.findall('\S+', line)
-
-        # feature_sets = []
-        # for feature_function in all_feature_functions:
-        #     feature_set = feature_function(document)
-        #     feature_sets.append(feature_set)
-
-        # tokens_feature_sets = zip(*feature_sets)
-        # tokens_features = map(flatten, tokens_feature_sets)
-
-        # or replace the previous six lines with:
-        tokens_features = map(flatten, zip(*[feature_function(document) for feature_function in all_feature_functions]))
-
+        # tokenize the document on whitespace
+        tokens = token_re.findall(line)
+        # apply all feature functions
+        tokens_features = featurize(tokens, all_feature_functions)
         for i, token_features in enumerate(tokens_features):
             print i, token_features
 

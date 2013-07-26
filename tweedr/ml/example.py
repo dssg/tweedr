@@ -1,50 +1,36 @@
 import argparse
 from colorama import Fore
 
-from tweedr.lib import flatten, bifurcate, Counts
+from tweedr.lib import bifurcate, Counts
 from tweedr.lib.text import gloss
 from tweedr.models import DBSession, TokenizedLabel, Label
 from tweedr.ml import crf
-from tweedr.ml.features import all_feature_functions
+from tweedr.ml.features import all_feature_functions, featurize
 
 
-def main(test_proportion, max_data, model_path):
+def main(test_proportion, max_data, model_filepath):
     print '%d labels' % DBSession.query(Label).count()
     for label in DBSession.query(Label):
         print '  %s = %s' % (label.id, label.text)
 
+    # e.g., tokenized_label =
+    # <TokenizedLabel dssg_id=23346 token_start=13 token_end=16
+    #    tweet=Tornado Kills 89 in Missouri. http://t.co/IEuBas5 token_type=i18 token= 89 id=5>
     tokenized_labels = DBSession.query(TokenizedLabel).limit(max_data).all()
     test, train = bifurcate(tokenized_labels, test_proportion, shuffle=True)
     print 'Training on %d, testing on %d' % (len(train), len(test))
 
-    trainer = crf.Trainer()
-
-    # e.g., tokenized_label =
-    # <TokenizedLabel dssg_id=23346 token_start=13 token_end=16
-    #    tweet=Tornado Kills 89 in Missouri. http://t.co/IEuBas5 token_type=i18 token= 89 id=5>
-    for tokenized_label in train:
-        tokens = tokenized_label.tokens
-        labels = tokenized_label.labels
-        # produce all the features and then flatten them
-        data = map(flatten, zip(*[feature_function(tokens) for feature_function in all_feature_functions]))
-
-        trainer.append_raw(data, labels)
-
-    trainer.save(model_path)
-
-    print 'CRF model saved to ' + model_path
-
     totals = Counts()
-
-    tagger = crf.Tagger(model_path)
+    tagger = crf.Tagger.from_path_or_data(train, all_feature_functions, model_filepath=model_filepath)
+    print 'CRF model saved to ' + model_filepath
     for tokenized_label in test:
         # print 'Tagging:', tokenized_label
 
         tokens = tokenized_label.tokens
         gold_labels = tokenized_label.labels
-        data = map(flatten, zip(*[feature_function(tokens) for feature_function in all_feature_functions]))
+        tokens_features = featurize(tokens, all_feature_functions)
 
-        predicted_labels = list(tagger.tag_raw(data))
+        predicted_labels = list(tagger.tag_raw(tokens_features))
         alignments = zip(tokens, gold_labels, predicted_labels)
         print gloss(alignments,
             prefixes=(Fore.WHITE, Fore.YELLOW, Fore.BLUE),

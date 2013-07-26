@@ -2,7 +2,6 @@ import os
 import sys
 import fnmatch
 import random
-import operator
 from copy import copy
 
 
@@ -22,10 +21,6 @@ def stdout(s):
 
 def stdoutn(s=''):
     stdout(str(s) + os.linesep)
-
-
-def flatten(xs):
-    return reduce(operator.add, xs)
 
 
 def uniq(xs):

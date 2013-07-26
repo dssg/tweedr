@@ -1,10 +1,38 @@
 # Trainer and Tagger come pretty much directly from
 #   git://github.com/chbrown/nlp.git/python/det/crf.py, which is MIT Licensed
+import os
 import crfsuite
 import logging
+import tempfile
+
+from tweedr.ml.features import featurize
+
 
 logger = logging.getLogger(__name__)
 version = crfsuite.version()
+
+
+class ItemSequence(crfsuite.ItemSequence):
+    def __init__(self, features_iter):
+        '''Create new ItemSequence, typedef std::vector<Item> based on the
+        given iterable of iterable of 2-tuples or strings'''
+        super(ItemSequence, self).__init__()
+        self.append_raw(features_iter)
+
+    def append_raw(self, features_iter):
+        '''
+        @features_iter is an iterable of iterables, of tuples or strings.
+            type: [[(str, float) | str]], where [] is an iterable
+        '''
+        for features in features_iter:
+            item = crfsuite.Item()
+            for feature in features:
+                if isinstance(feature, tuple):
+                    attribute = crfsuite.Attribute(*feature)
+                else:
+                    attribute = crfsuite.Attribute(feature)
+                item.append(attribute)
+            self.append(item)
 
 
 class Trainer(crfsuite.Trainer):
@@ -15,21 +43,11 @@ class Trainer(crfsuite.Trainer):
     def message(self, s):
         logger.debug('Trainer.message: %s', s)
 
-    def append_raw(self, features_seq, labels):
-        # len(labels) = len(features_seq) = length of sentence / sequence
-        # labels is a tuple of strings, features_seq is an tuple/list of variable-length lists of strings.
+    def append_raw(self, features_iter, labels):
+        # len(labels) = len(features_iter) = length of sentence / sequence
+        # labels is a tuple of strings, features_iter is an tuple/list of variable-length lists of strings.
         # this just wraps all the data / labels with crfsuite types
-        items = crfsuite.ItemSequence()
-        for features in features_seq:
-            item = crfsuite.Item()
-            for feature in features:
-                if isinstance(feature, tuple):
-                    attribute = crfsuite.Attribute(*feature)
-                else:
-                    attribute = crfsuite.Attribute(feature)
-                item.append(attribute)
-            items.append(item)
-
+        items = ItemSequence(features_iter)
         # labels = crfsuite.StringList(labels)
         self.append(items, tuple(labels), 0)
 
@@ -59,28 +77,38 @@ class Tagger(crfsuite.Tagger):
         super(Tagger, self).__init__()
         self.open(model_path)
 
-    def tag(self, data):
+    def tag_raw(self, features_iter):
         '''
         Obtain the label sequence predicted by the tagger.
 
-        This returns a tuple of strings.
+        This returns a tuple of strings (label identifiers)
         '''
-        self.set(data)
+        items = ItemSequence(features_iter)
+        self.set(items)
+        # could also run self.probability() and self.marginal()
         return self.viterbi()
 
-    def tag_raw(self, data):
-        # data is a list of lists, which may very well be just 1-long
-        # data = [['The'], ['man'], ['barked']]
-        # The sublists maybe contain tuples (of string->float pairs)
-        # data = [['The', ('first', 1)], ['man', 'human', ('first', 0)], ...]
-        items = crfsuite.ItemSequence()
-        for datum in data:
-            item = crfsuite.Item()
-            for feature in datum:
-                if isinstance(feature, tuple):
-                    item.append(crfsuite.Attribute(*feature))
-                else:
-                    item.append(crfsuite.Attribute(feature))
-            items.append(item)
+    @classmethod
+    def from_path_or_data(cls, data, feature_functions, model_filepath=None):
+        '''If we are given a model_filepath that points to an existing file, use it.
+        otherwise, create a temporary file to store the model because CRFSuite
+        doesn't seem to allow us to create a tagger directly from a trained
+        trainer (oddly)'''
+        if model_filepath is None or not os.path.exists(model_filepath):
+            if model_filepath is None:
+                model_filepath = tempfile.NamedTemporaryFile(delete=False).name
 
-        return self.tag(items)
+            trainer = Trainer()
+            for i, datum in enumerate(data):
+                tokens = datum.tokens
+                labels = datum.labels
+
+                tokens_features = featurize(tokens, feature_functions)
+                trainer.append_raw(tokens_features, labels)
+
+            trainer.save(model_filepath)
+            logger.debug('Trained on %d instances and saved to %s', i, model_filepath)
+        else:
+            logger.debug('Loading existing model from %d', model_filepath)
+
+        return cls(model_filepath)

@@ -19,7 +19,7 @@ class TestFormatting(unittest.TestCase):
 
         self.assertEqual(report.total_errors, 0, 'Codebase does not pass PEP-8 (%d errors)' % report.total_errors)
 
-    def test_pyflakes(self):
+    def test_flake8(self):
         print 'Running flake8 on **/*.py in %s' % tweedr.root
         total_errors = 0
         for base, directories, filenames in os.walk(tweedr.root):

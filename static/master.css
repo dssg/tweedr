@@ -1,0 +1,10 @@
+html{height:100%}
+body{font-family:'Helvetica Neue',Helvetica,Arial;font-weight:200;height:100%;margin:0;padding:0;box-sizing:border-box}
+h1,h2,h3,h4,h5,h6{margin:.25em 0 .5em}
+p{margin:.5em 0}
+label span{font-weight:bold}
+table{border-collapse:collapse}
+td{padding:0 8px 2px 0;vertical-align:top;font-size:90%;white-space:nowrap}
+button{margin:10px 0}
+textarea{display:block}
+.control{margin:10px;float:left}

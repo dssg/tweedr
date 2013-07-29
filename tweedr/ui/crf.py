@@ -55,7 +55,9 @@ def tokenized_labels_sample():
 
 @app.post('/tagger/tag')
 def tagger_tag():
-    text = request.forms.get('text')
+    # For bottle >= 0.10, request.forms.xyz attributes return unicode strings
+    # and an empty string if decoding fails.
+    text = request.forms.text
     tokens = token_re.findall(text.encode('utf8'))
 
     tokens_features = featurize(tokens, all_feature_functions)

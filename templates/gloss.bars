@@ -1,0 +1,16 @@
+<h3>Text</h3>
+<p>{{text}}</p>
+
+<h3>Alignments</h3>
+<table class="gloss">
+  <tbody>
+    {{#each sequences}}
+      <tr>
+        <td><i>{{name}}</i></td>
+        {{#each values}}
+          <td>{{.}}</td>
+        {{/each}}
+      </tr>
+    {{/each}}
+  </tbody>
+</table>

@@ -6,5 +6,7 @@
 <script src="/static/lib/underscore.min.js"></script>
 <script src="/static/lib/jquery.min.js"></script>
 <script src="/static/lib/backbone.min.js"></script>
+<script src="/static/lib/handlebars.js"></script>
+<script src="/static/lib/templating.js"></script>
 
 ${next.body()}

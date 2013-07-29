@@ -1,0 +1,10 @@
+{
+  "staticDependencies": {
+    "jquery": "*",
+    "underscore": "*",
+    "backbone": "*",
+    "handlebars": "*",
+    "misc-js": "git://github.com/chbrown/misc-js.git"
+  },
+  "staticPattern": "static/lib/{file}"
+}

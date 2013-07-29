@@ -5,6 +5,8 @@ p{margin:.5em 0}
 label span{font-weight:bold}
 table{border-collapse:collapse}table td{padding:0 8px 2px 0;vertical-align:top;font-size:90%;white-space:nowrap}
 table.valign td{vertical-align:middle}
+table.gloss tr:first-child td{font-weight:bold}
+table.gloss td,table.gloss th{text-align:left;border:1px dotted #ccc;padding:1px 3px;word-break:normal;white-space:normal;max-width:140px}
 button{margin:10px 0}
 textarea{display:block}
 .control{margin:10px;float:left}

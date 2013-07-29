@@ -30,6 +30,19 @@ table {
   &.valign td {
     vertical-align: middle;
   }
+  &.gloss {
+    tr:first-child td {
+      font-weight: bold;
+    }
+    td, th {
+      text-align: left;
+      border: 1px dotted #CCC;
+      padding: 1px 3px;
+      word-break: normal;
+      white-space: normal;
+      max-width: 140px;
+    }
+  }
 }
 button {
   margin: 10px 0;

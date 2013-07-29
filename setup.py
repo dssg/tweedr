@@ -48,6 +48,7 @@ setup(
     version='0.0.2',
     packages=['tweedr'],
     install_requires=[
+        'bottle',
         'colorama',
         'mysql-python',
         'scikit-learn',

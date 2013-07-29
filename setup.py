@@ -67,6 +67,9 @@ setup(
         # this is a built-in command for distutils, but I just override it here
         'install_data': install_data,
     },
-    tests_require=['pep8'],
+    tests_require=[
+        'pep8',
+        'flake8'
+    ],
     test_suite='tests',
 )

@@ -2,8 +2,7 @@ import os
 import time
 
 import bottle
-from bottle import request
-from bottle import mako_view as view  # , mako_template as template
+from bottle import request, static_file, mako_view as view
 
 import tweedr
 from tweedr.lib.text import token_re
@@ -11,10 +10,8 @@ from tweedr.ml import crf
 from tweedr.ml.features import all_feature_functions, featurize
 from tweedr.models import DBSession, TokenizedLabel
 
-
 # tell bottle where to look for templates
-template_path = os.path.join(os.path.dirname(tweedr.__file__), '..', 'templates')
-bottle.TEMPLATE_PATH.insert(0, template_path)
+bottle.TEMPLATE_PATH.append(os.path.join(tweedr.root, 'templates'))
 
 # this is the primary export
 app = bottle.Bottle()
@@ -29,6 +26,8 @@ def initialize():
     tmp_filepath = '/tmp/tweedr.ui.crf.model'
     tagger = crf.Tagger.from_path_or_data(query, all_feature_functions, model_filepath=tmp_filepath)
     GLOBALS['tagger'] = tagger
+
+initialize()
 
 
 @app.get('/')
@@ -59,4 +58,6 @@ def retrain():
     return dict(success=True)
 
 
-initialize()
+@app.route('/static/<filepath:path>')
+def server_static(filepath):
+    return static_file(filepath, os.path.join(tweedr.root, 'static'))

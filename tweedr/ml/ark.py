@@ -5,7 +5,7 @@ from subprocess import Popen, PIPE
 
 import tweedr
 
-jar_path = os.path.join(os.path.dirname(tweedr.__file__), '..', 'ext', 'ark-tweet-nlp-0.3.2.jar')
+jar_path = os.path.join(tweedr.root, 'ext', 'ark-tweet-nlp-0.3.2.jar')
 
 # start a long-running process when this module is required
 tagger_proc = Popen(['java', '-cp', jar_path, 'cmu.arktweetnlp.RunTagger',
@@ -25,14 +25,14 @@ def run_tagger(string):
     the first line will be tagged and returned, but this will leave unread output
     in the subprocess, which will be prepended to any subsequent calls to this method.
     '''
+    # maybe just remove all newlines from the string?
     tagger_proc.stdin.write(string)
 
     output_buffer = StringIO()
     while True:
-        # we have to read in bytes one-by-one because we break as soon as we hit a newline
+        # we have to read in bytes one-by-one because we have to break as soon as we hit a newline
         byte = tagger_proc.stdout.read(1)
         output_buffer.write(byte)
-        print repr(output_buffer.getvalue())
         if byte == '\n':
             break
 

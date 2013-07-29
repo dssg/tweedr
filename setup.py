@@ -69,7 +69,7 @@ setup(
     },
     tests_require=[
         'pep8',
-        'flake8'
+        'pyflakes',
     ],
     test_suite='tests',
 )

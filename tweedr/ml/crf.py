@@ -41,7 +41,7 @@ class Trainer(crfsuite.Trainer):
     progress messages from a training process.
     """
     def message(self, s):
-        logger.debug('Trainer.message: %s', s)
+        logger.debug('Trainer.message: %s', s.strip())
 
     def append_raw(self, features_iter, labels):
         # len(labels) = len(features_iter) = length of sentence / sequence

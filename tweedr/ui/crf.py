@@ -1,5 +1,4 @@
 import os
-import time
 import logging
 import random
 
@@ -35,7 +34,7 @@ initialize()
 
 
 @app.get('/')
-def index():
+def root():
     redirect('/crf')
 
 
@@ -56,7 +55,6 @@ def tokenized_labels_sample():
 
 @app.post('/tagger/tag')
 def tagger_tag():
-    started = time.time()
     text = request.forms.get('text')
     tokens = token_re.findall(text.encode('utf8'))
 
@@ -64,8 +62,13 @@ def tagger_tag():
     tagger = GLOBALS['tagger']
     labels = list(tagger.tag_raw(tokens_features))
 
-    duration = time.time() - started
-    return dict(tokens=tokens, labels=labels, duration=duration)
+    return {
+        'sequences': [
+            {'name': 'tokens', 'values': tokens},
+            {'name': 'features', 'values': [' '.join(token_features) for token_features in tokens_features]},
+            {'name': 'labels', 'values': labels},
+        ]
+    }
 
 
 @app.route('/tagger/retrain')
@@ -79,3 +82,8 @@ def tagger_retrain():
 @app.route('/static/<filepath:path>')
 def serve_static_file(filepath):
     return static_file(filepath, os.path.join(tweedr.root, 'static'))
+
+
+@app.route('/templates/<filepath:path>')
+def serve_templates_file(filepath):
+    return static_file(filepath, os.path.join(tweedr.root, 'templates'))

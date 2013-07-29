@@ -56,6 +56,7 @@ setup(
         'tweetstream',
         'twython',
         'ujson',
+        'pattern',
     ],
     entry_points={
         'console_scripts': [

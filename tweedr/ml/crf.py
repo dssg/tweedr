@@ -109,6 +109,6 @@ class Tagger(crfsuite.Tagger):
             trainer.save(model_filepath)
             logger.debug('Trained on %d instances and saved to %s', i, model_filepath)
         else:
-            logger.debug('Loading existing model from %d', model_filepath)
+            logger.debug('Loading existing model from %s', model_filepath)
 
         return cls(model_filepath)

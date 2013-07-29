@@ -18,9 +18,13 @@ metadata = MetaData(bind=engine)
 
 
 class BaseMixin(object):
+    def __json__(self):
+        # this serves to both copy the record's values as well as filter out the special sqlalchemy key
+        return dict((k, v) for k, v in self.__dict__.items() if k != '_sa_instance_state')
+
     def __unicode__(self):
         type_name = self.__class__.__name__
-        pairs = [u'%s=%s' % kv for kv in self.__dict__.items() if kv[0] != '_sa_instance_state']
+        pairs = [u'%s=%s' % (k, v) for k, v in self.__json__.items()]
         return u'<%s %s>' % (type_name, u' '.join(pairs))
 
     def __repr__(self):

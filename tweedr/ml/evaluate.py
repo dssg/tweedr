@@ -1,4 +1,6 @@
+import os
 import argparse
+import logging
 from colorama import Fore
 
 from tweedr.lib import bifurcate, Counts
@@ -7,31 +9,32 @@ from tweedr.models import DBSession, TokenizedLabel, Label
 from tweedr.ml import crf
 from tweedr.ml.features import all_feature_functions, featurize
 
+logger = logging.getLogger(__name__)
+
 
 def evaluate(test_proportion, max_data, model_filepath):
-    print '%d labels' % DBSession.query(Label).count()
+    logger.debug('%d labels', DBSession.query(Label).count())
     for label in DBSession.query(Label):
-        print '  %s = %s' % (label.id, label.text)
+        logger.debug('  %s = %s', label.id, label.text)
 
     # e.g., tokenized_label =
     # <TokenizedLabel dssg_id=23346 token_start=13 token_end=16
     #    tweet=Tornado Kills 89 in Missouri. http://t.co/IEuBas5 token_type=i18 token= 89 id=5>
     tokenized_labels = DBSession.query(TokenizedLabel).limit(max_data).all()
     test, train = bifurcate(tokenized_labels, test_proportion, shuffle=True)
-    print 'Training on %d, testing on %d' % (len(train), len(test))
+    logger.info('Training on %d, testing on %d', len(train), len(test))
 
     totals = Counts()
     tagger = crf.Tagger.from_path_or_data(train, all_feature_functions, model_filepath=model_filepath)
-    print 'CRF model saved to ' + model_filepath
+    logger.debug('CRF model saved to %s', model_filepath)
     for tokenized_label in test:
-        # print 'Tagging:', tokenized_label
-
         tokens = tokenized_label.tokens
         gold_labels = tokenized_label.labels
         tokens_features = featurize(tokens, all_feature_functions)
 
         predicted_labels = list(tagger.tag_raw(tokens_features))
         alignments = zip(tokens, gold_labels, predicted_labels)
+        print '-' * 80
         print gloss(alignments,
             prefixes=(Fore.WHITE, Fore.YELLOW, Fore.BLUE),
             postfixes=(Fore.RESET, Fore.RESET, Fore.RESET))
@@ -62,16 +65,15 @@ def evaluate(test_proportion, max_data, model_filepath):
 
         totals.add(counts)
 
-        print '-' * 80
-
-    print totals
+    logger.debug('totals: %r', totals)
 
     precision = float(totals.true_positives) / (totals.true_positives + totals.false_positives)
     recall = float(totals.true_positives) / (totals.true_positives + totals.false_negatives)
     fscore = 2 * (precision * recall / (precision + recall))
-    print 'Precision: %0.4f' % precision
-    print 'Recall: %0.4f' % recall
-    print 'F-score: %0.4f' % fscore
+
+    logger.debug('Precision: %0.4f', precision)
+    logger.debug('Recall: %0.4f', recall)
+    logger.debug('F-score: %0.4f', fscore)
 
     # TODO: list top tokens for each label type
 
@@ -81,9 +83,9 @@ if __name__ == '__main__':
         description='Train CRFSuite on data from the QCRI MySQL database',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--test-proportion',
-        type=float, default=0.1, help='The proportion of the total data to train on')
+        type=float, default=0.1, help='The proportion of the total data to test on')
     parser.add_argument('--max-data',
-        type=int, default=1000, help='Maximum data points to train and test on')
+        type=int, default=10000, help='Maximum data points to train and test on')
     parser.add_argument('--model-path',
         default='/tmp/crfsuite-ml-example.model')
     parser.add_argument('--crfsuite-version',
@@ -93,4 +95,7 @@ if __name__ == '__main__':
     if opts.crfsuite_version:
         print 'CRFSuite v%s' % crf.version
     else:
+        if os.path.exists(opts.model_path):
+            logger.info('Removing %s', opts.model_path)
+            os.remove(opts.model_path)
         evaluate(opts.test_proportion, opts.max_data, opts.model_path)

@@ -6,7 +6,7 @@ import tweedr
 
 class TestCredentials(unittest.TestCase):
     def test_mysql(self):
-        if 'TRAVIS' in os.environ:
+        if os.environ.get('TRAVIS'):
             print 'For obvious reasons, Travis CI cannot run this test.'
         else:
             names = ['MYSQL_PASS', 'MYSQL_HOST']

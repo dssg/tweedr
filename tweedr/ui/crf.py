@@ -8,7 +8,7 @@ from bottle import request, redirect, static_file, mako_view as view
 import tweedr
 from tweedr.lib.text import token_re
 from tweedr.ml import crf
-from tweedr.ml.features import all_feature_functions, featurize
+from tweedr.ml.features import crf_feature_functions, featurize
 from tweedr.models import DBSession, TokenizedLabel
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ def initialize():
     query = DBSession.query(TokenizedLabel).limit(1000)
     logger.debug('initializing %s', __name__)
     tmp_filepath = '/tmp/tweedr.ui.crf.model'
-    tagger = crf.Tagger.from_path_or_data(query, all_feature_functions, model_filepath=tmp_filepath)
+    tagger = crf.Tagger.from_path_or_data(query, crf_feature_functions, model_filepath=tmp_filepath)
     GLOBALS['tagger'] = tagger
 
 initialize()
@@ -60,7 +60,7 @@ def tagger_tag():
     text = request.forms.text
     tokens = token_re.findall(text.encode('utf8'))
 
-    tokens_features = featurize(tokens, all_feature_functions)
+    tokens_features = featurize(tokens, crf_feature_functions)
     tagger = GLOBALS['tagger']
     labels = list(tagger.tag_raw(tokens_features))
 
@@ -76,7 +76,7 @@ def tagger_tag():
 @app.route('/tagger/retrain')
 def tagger_retrain():
     query = DBSession.query(TokenizedLabel).limit(10000)
-    tagger = crf.Tagger.from_path_or_data(query, all_feature_functions)
+    tagger = crf.Tagger.from_path_or_data(query, crf_feature_functions)
     GLOBALS['tagger'] = tagger
     return dict(success=True)
 

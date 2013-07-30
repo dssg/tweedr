@@ -62,6 +62,18 @@ all_feature_functions = [
     lbigrams,
     ctrigrams,
     plural,
+    is_transportation,
+    is_building,
+    capitalized,
+    numeric,
+    unique,
+]
+
+crf_feature_functions = [
+    unigrams,
+    plural,
+    is_transportation,
+    is_building,
     capitalized,
     numeric,
     unique,

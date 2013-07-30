@@ -7,7 +7,7 @@ from tweedr.lib import bifurcate, Counts
 from tweedr.lib.text import gloss
 from tweedr.models import DBSession, TokenizedLabel, Label
 from tweedr.ml import crf
-from tweedr.ml.features import all_feature_functions, featurize
+from tweedr.ml.features import crf_feature_functions, featurize
 
 logger = logging.getLogger(__name__)
 
@@ -25,12 +25,12 @@ def evaluate(test_proportion, max_data, model_filepath):
     logger.info('Training on %d, testing on %d', len(train), len(test))
 
     totals = Counts()
-    tagger = crf.Tagger.from_path_or_data(train, all_feature_functions, model_filepath=model_filepath)
+    tagger = crf.Tagger.from_path_or_data(train, crf_feature_functions, model_filepath=model_filepath)
     logger.debug('CRF model saved to %s', model_filepath)
     for tokenized_label in test:
         tokens = tokenized_label.tokens
         gold_labels = tokenized_label.labels
-        tokens_features = featurize(tokens, all_feature_functions)
+        tokens_features = featurize(tokens, crf_feature_functions)
 
         predicted_labels = list(tagger.tag_raw(tokens_features))
         alignments = zip(tokens, gold_labels, predicted_labels)

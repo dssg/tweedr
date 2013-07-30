@@ -1,7 +1,8 @@
 # each feature function takes an N-long document (list of strings) and returns an N-long list
 #   of lists/tuples of features (i.e., strings) to add to the total data for that sentence.
 #   often the list will contain lists that are 1-long
-import lexicon_list
+from lexicon_list import transportation, buildings
+
 
 def spacer(xs):
     return [' '.join(xs)]

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from pattern.en import wordnet
-import numpy as np
 
 
 def WordnetFeatures(token):

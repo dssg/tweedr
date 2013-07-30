@@ -8,7 +8,7 @@ from tweedr.ml import crf
 from tweedr.ml.features import all_feature_functions, featurize
 
 
-def main(test_proportion, max_data, model_filepath):
+def evaluate(test_proportion, max_data, model_filepath):
     print '%d labels' % DBSession.query(Label).count()
     for label in DBSession.query(Label):
         print '  %s = %s' % (label.id, label.text)
@@ -66,25 +66,31 @@ def main(test_proportion, max_data, model_filepath):
 
     print totals
 
-    print 'Precision: %0.4f' % (
-        float(totals.true_positives) /
-        (totals.true_positives + totals.false_positives))
-    print 'Recall: %0.4f' % (
-        float(totals.true_positives) /
-        (totals.true_positives + totals.false_negatives))
+    precision = float(totals.true_positives) / (totals.true_positives + totals.false_positives)
+    recall = float(totals.true_positives) / (totals.true_positives + totals.false_negatives)
+    fscore = 2 * (precision * recall / (precision + recall))
+    print 'Precision: %0.4f' % precision
+    print 'Recall: %0.4f' % recall
+    print 'F-score: %0.4f' % fscore
 
     # TODO: list top tokens for each label type
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Train CRFSuite on data from the QCRI MySQL database')
-    parser.add_argument('--test-proportion', type=float, default=0.1, help='The proportion of the total data to train on')
-    parser.add_argument('--max-data', type=int, default=1000, help='Maximum data points to train and test on')
-    parser.add_argument('--model-path', default='/tmp/crfsuite-ml-example.model')
-    parser.add_argument('--crfsuite-version', action='store_true', help='Print the active crfsuite version')
+    parser = argparse.ArgumentParser(
+        description='Train CRFSuite on data from the QCRI MySQL database',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--test-proportion',
+        type=float, default=0.1, help='The proportion of the total data to train on')
+    parser.add_argument('--max-data',
+        type=int, default=1000, help='Maximum data points to train and test on')
+    parser.add_argument('--model-path',
+        default='/tmp/crfsuite-ml-example.model')
+    parser.add_argument('--crfsuite-version',
+        action='store_true', help='Print the active crfsuite version')
     opts = parser.parse_args()
 
     if opts.crfsuite_version:
         print 'CRFSuite v%s' % crf.version
     else:
-        main(opts.test_proportion, opts.max_data, opts.model_path)
+        evaluate(opts.test_proportion, opts.max_data, opts.model_path)

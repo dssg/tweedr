@@ -46,7 +46,7 @@ class ClassifierI(base.ClassifierMixin):
         raise NotImplementedError(__doc__)
 
 
-def print_metrics_summary(gold_labels, predicted_labels, top=20):
+def print_metrics_summary(gold_labels, predicted_labels, sample=0):
     print '''    Accuracy: {accuracy}
     P/R: {precision:.4f}/{recall:.4f}
     F1: {fscore:.4f}'''.format(
@@ -56,30 +56,26 @@ def print_metrics_summary(gold_labels, predicted_labels, top=20):
         fscore=metrics.f1_score(gold_labels, predicted_labels)
     )
 
-    if top > 0:
+    if sample > 0:
         print 'Sample of classifications '
-        for _, gold, predicted in zip(xrange(top), gold_labels, predicted_labels):
+        for _, gold, predicted in zip(xrange(sample), gold_labels, predicted_labels):
             print '  gold: {gold}, predicted: {predicted}'.format(gold=gold, predicted=predicted)
 
 
-def compare_labels(gold_labels, predicted_labels):
+def compare_labels(gold_labels, predicted_labels, null_label):
     counts = Counts()
     for gold_label, predicted_label in zip(gold_labels, predicted_labels):
         counts.comparisons += 1
-        if gold_label != 'None':
+        if gold_label != null_label:
             if predicted_label == gold_label:
                 counts.true_positives += 1
             else:
                 counts.false_negatives += 1
 
-        if gold_label == 'None':
+        if gold_label == null_label:
             if predicted_label == gold_label:
                 counts.true_negatives += 1
             else:
                 counts.false_positives += 1
-
-    # precision = float(counts.true_positives) / (counts.true_positives + counts.false_positives)
-    # recall = float(counts.true_positives) / (counts.true_positives + counts.false_negatives)
-    # fscore = 2 * (precision * recall / (precision + recall))
 
     return counts

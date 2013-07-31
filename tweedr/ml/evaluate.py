@@ -1,93 +1,79 @@
-import os
+# import os
 import argparse
 import logging
 from colorama import Fore
 
-from tweedr.lib import bifurcate, Counts
+from sklearn import cross_validation  # , metrics
+# from sklearn.pipeline import Pipeline
+# from sklearn.feature_extraction import text
+
 from tweedr.lib.text import gloss
-from tweedr.models import DBSession, TokenizedLabel, Label
-from tweedr.ml import crf
+from tweedr.models import DBSession, TokenizedLabel  # , Label
+from tweedr.ml import crf, print_metrics_summary, compare_labels
 from tweedr.ml.features import crf_feature_functions, featurize
 
 logger = logging.getLogger(__name__)
 
+# logger.debug('%d labels', DBSession.query(Label).count())
+# for label in DBSession.query(Label):
+#     logger.debug('  %s = %s', label.id, label.text)
 
-def evaluate(test_proportion, max_data, model_filepath):
-    logger.debug('%d labels', DBSession.query(Label).count())
-    for label in DBSession.query(Label):
-        logger.debug('  %s = %s', label.id, label.text)
 
-    # e.g., tokenized_label =
-    # <TokenizedLabel dssg_id=23346 token_start=13 token_end=16
-    #    tweet=Tornado Kills 89 in Missouri. http://t.co/IEuBas5 token_type=i18 token= 89 id=5>
-    tokenized_labels = DBSession.query(TokenizedLabel).limit(max_data).all()
-    test, train = bifurcate(tokenized_labels, test_proportion, shuffle=True)
+def evaluate(train, test, print_gloss=False):
+    '''
+    Train and test must be iterables of objects that support CRF-ready .tokens
+    and .labels attributes.
+    '''
     logger.info('Training on %d, testing on %d', len(train), len(test))
+    tagger = crf.Tagger.from_path_or_data(train, crf_feature_functions)
 
-    totals = Counts()
-    tagger = crf.Tagger.from_path_or_data(train, crf_feature_functions, model_filepath=model_filepath)
-    logger.debug('CRF model saved to %s', model_filepath)
-    for tokenized_label in test:
-        tokens = tokenized_label.tokens
-        gold_labels = tokenized_label.labels
+    gold_labels = []
+    predicted_labels = []
+    for item in test:
+        tokens = item.tokens
+        item_gold_labels = item.labels
+        gold_labels += item_gold_labels
         tokens_features = featurize(tokens, crf_feature_functions)
+        item_predicted_labels = list(tagger.tag_raw(tokens_features))
+        predicted_labels += item_predicted_labels
 
-        predicted_labels = list(tagger.tag_raw(tokens_features))
-        alignments = zip(tokens, gold_labels, predicted_labels)
-        print '-' * 80
-        print gloss(alignments,
-            prefixes=(Fore.WHITE, Fore.YELLOW, Fore.BLUE),
-            postfixes=(Fore.RESET, Fore.RESET, Fore.RESET))
+        if print_gloss:
+            alignments = zip(tokens, item_gold_labels, item_predicted_labels)
+            print '-' * 80
+            print gloss(alignments,
+                prefixes=(Fore.WHITE, Fore.YELLOW, Fore.BLUE),
+                postfixes=(Fore.RESET, Fore.RESET, Fore.RESET))
 
-        counts = Counts()
-        for gold_label, predicted_label in zip(gold_labels, predicted_labels):
-            counts.comparisons += 1
-            if gold_label != 'None':
-                if predicted_label == gold_label:
-                    counts.true_positives += 1
-                else:
-                    counts.false_negatives += 1
+    # sklearn metrics doesn't like string labels.
+    used_labels = list(set(gold_labels + predicted_labels))
+    print 'used_labels', used_labels
+    lookup = dict((label, index) for index, label in enumerate(used_labels))
+    print 'lookup', lookup
+    # remap to integers
+    gold_labels = [lookup[gold_label] for gold_label in gold_labels]
+    predicted_labels = [lookup[predicted_label] for predicted_label in predicted_labels]
 
-            if gold_label == 'None':
-                if predicted_label == gold_label:
-                    counts.true_negatives += 1
-                else:
-                    counts.false_positives += 1
+    print_metrics_summary(gold_labels, predicted_labels)
+    # classification_report requires numeric labels, apparently?
+    # print metrics.classification_report(gold_labels, predicted_labels)
 
-            # if gold_label != 'None' and predicted_label != 'None':
-            #     # non_null_partial_matches:
-            #     #   the number of items that anything but None for both gold and predicted
-            #     counts.non_null_partial_matches += 1
-            #     if gold_label == predicted_label:
-            #         counts.non_null_exact_matches += 1
-            # if gold_label == predicted_label:
-            #     counts.exact_matches += 1
-
-        totals.add(counts)
-
-    logger.debug('totals: %r', totals)
-
-    precision = float(totals.true_positives) / (totals.true_positives + totals.false_positives)
-    recall = float(totals.true_positives) / (totals.true_positives + totals.false_negatives)
+    counts = compare_labels(gold_labels, predicted_labels, lookup['None'])
+    print 'counts', counts
+    precision = float(counts.true_positives) / (counts.true_positives + counts.false_positives)
+    recall = float(counts.true_positives) / (counts.true_positives + counts.false_negatives)
     fscore = 2 * (precision * recall / (precision + recall))
-
-    logger.debug('Precision: %0.4f', precision)
-    logger.debug('Recall: %0.4f', recall)
-    logger.debug('F-score: %0.4f', fscore)
-
-    # TODO: list top tokens for each label type
+    for name, value in [('Precision', precision), ('Recall', recall), ('F-score', fscore)]:
+        print '%s: %.4f' % (name, value)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='Train CRFSuite on data from the QCRI MySQL database',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--test-proportion',
-        type=float, default=0.1, help='The proportion of the total data to test on')
+    parser.add_argument('-k', '--k-folds',
+        type=int, default=10, help='How many folds of the data to test on')
     parser.add_argument('--max-data',
         type=int, default=10000, help='Maximum data points to train and test on')
-    parser.add_argument('--model-path',
-        default='/tmp/crfsuite-ml-example.model')
     parser.add_argument('--crfsuite-version',
         action='store_true', help='Print the active crfsuite version')
     opts = parser.parse_args()
@@ -95,7 +81,14 @@ if __name__ == '__main__':
     if opts.crfsuite_version:
         print 'CRFSuite v%s' % crf.version
     else:
-        if os.path.exists(opts.model_path):
-            logger.info('Removing %s', opts.model_path)
-            os.remove(opts.model_path)
-        evaluate(opts.test_proportion, opts.max_data, opts.model_path)
+        # e.g., tokenized_label =
+        # <TokenizedLabel dssg_id=23346 token_start=13 token_end=16
+        #    tweet=Tornado Kills 89 in Missouri. http://t.co/IEuBas5 token_type=i18 token= 89 id=5>
+        tokenized_labels = DBSession.query(TokenizedLabel).limit(opts.max_data).all()
+
+        N = len(tokenized_labels)
+        for train_indices, test_indices in cross_validation.KFold(N, opts.k_folds, shuffle=True):
+            # train, test = tokenized_labels[train_indices], tokenized_labels[test_indices]
+            train = [tokenized_labels[i] for i in train_indices]
+            test = [tokenized_labels[i] for i in test_indices]
+            evaluate(train, test)

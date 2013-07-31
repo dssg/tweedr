@@ -5,6 +5,7 @@ import crfsuite
 import logging
 import tempfile
 
+from tweedr.ml import ClassifierI
 from tweedr.ml.features import featurize
 
 
@@ -41,7 +42,7 @@ class Trainer(crfsuite.Trainer):
     progress messages from a training process.
     """
     def message(self, s):
-        logger.debug('Trainer.message: %s', s.strip())
+        logger.silly('Trainer.message: %s', s.strip())
 
     def append_raw(self, features_iter, labels):
         # len(labels) = len(features_iter) = length of sentence / sequence
@@ -93,7 +94,7 @@ class Tagger(crfsuite.Tagger):
         '''If we are given a model_filepath that points to an existing file, use it.
         otherwise, create a temporary file to store the model because CRFSuite
         doesn't seem to allow us to create a tagger directly from a trained
-        trainer (oddly)'''
+        trainer object.'''
         if model_filepath is None or not os.path.exists(model_filepath):
             if model_filepath is None:
                 model_filepath = tempfile.NamedTemporaryFile(delete=False).name
@@ -112,3 +113,9 @@ class Tagger(crfsuite.Tagger):
             logger.debug('Loading existing model from %s', model_filepath)
 
         return cls(model_filepath)
+
+
+class CRFClassifier(ClassifierI):
+    '''Doesn't fit entirely within the classifier paradigm, due to the hierarchy of data:
+    Sentences have each token labeled, but each sentence is an individual entity.
+    '''

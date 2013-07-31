@@ -98,15 +98,20 @@ Some tasks require external resources, which are downloaded separately:
 
     > Use 4 spaces per indentation level.
 
-    There are lots of other nice things about PEP-8, but that's the most important one.
+    PEP-8 has a couple of other requirements that aid readability, but that's the most important one.
+    This project allows two exceptions to PEP-8:
 
-    The only exceptions to this are `E501` and `E128`.
+        > E128: continuation line under-indented for visual indent
 
-    The PEP-8 check is incorporated as a unit test, which just runs `pep8 . --ignore=E128,E501` in the base directory.
+        > E501: line too long (?? > 79 characters)
+
+    The PEP-8 check is incorporated as a unit test, which basically runs `pep8 tweedr/ --ignore=E128,E501`.
+
+    [PEP-257](http://www.python.org/dev/peps/pep-0257/) has some things to say about docstrings, but this project doesn't necessarily strictly adhere to its provisions.
 
 2. No trailing whitespace.
 
-    Trailing whitespace is almost always ignored, but it is non-deterministic, and can make commit diffs hard to read quickly.
+    Trailing whitespace is almost always ignored, but it is non-deterministic, and can make commit diffs hard to read quickly. This project truncates trailing whitespace wherever possible.
 
 3. Python 2.7 is recommended.
 
@@ -115,7 +120,6 @@ Some tasks require external resources, which are downloaded separately:
     [![Build Status](https://travis-ci.org/dssg/tweedr.png?branch=master)](https://travis-ci.org/dssg/tweedr)
 
     Run `python setup.py test` in the base directory.
-
 
 ## Development environment
 

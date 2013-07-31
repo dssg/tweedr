@@ -42,14 +42,29 @@ def uniq(xs):
 
 
 def iglob(pattern, root='.'):
-    for parent, dirnames, filenames in os.walk(root):
-        filepaths = [os.path.join(parent, filename) for filename in filenames]
+    for dirpath, dirnames, filenames in os.walk(root):
+        filepaths = [os.path.join(dirpath, filename) for filename in filenames]
         for filepath in fnmatch.filter(filepaths, pattern):
             yield filepath
 
 
+def walk(top, pred=None):
+    # if pred is not None, pred(filepath) must be True for each filepath to be returned
+    for dirpath, dirnames, filenames in os.walk(top):
+        filepaths = [os.path.join(dirpath, filename) for filename in filenames]
+        for filepath in filepaths:
+            if pred is None or pred(filepath):
+                yield filepath
+
+
 def bifurcate(xs, ratio, shuffle=False):
-    # takes a list like [b, c, a, m, n] and ratio like 0.6 and returns two lists: [b, c, a], [m, n]
+    '''
+    Takes a list like [b, c, a, m, n] and ratio like 0.6 and returns two lists: [b, c, a], [m, n]
+
+    E.g.,
+
+        test, train = bifurcate(tokenized_labels, test_proportion, shuffle=True)
+    '''
     length = len(xs)
     pivot = int(ratio * length)
     if shuffle:

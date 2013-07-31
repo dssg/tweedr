@@ -2,6 +2,7 @@ import os
 import sys
 import fnmatch
 import random
+import subprocess
 from copy import copy
 
 
@@ -21,6 +22,11 @@ def stdout(s):
 
 def stdoutn(s=''):
     stdout(str(s) + os.linesep)
+
+
+def tty_size():
+    height, width = subprocess.check_output(['stty', 'size']).split()
+    return (int(height), int(width))
 
 
 def uniq(xs):

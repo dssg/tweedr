@@ -1,7 +1,8 @@
 # each feature function takes an N-long document (list of strings) and returns an N-long list
 #   of lists/tuples of features (i.e., strings) to add to the total data for that sentence.
 #   often the list will contain lists that are 1-long
-from lexicon_list import transportation, buildings
+import lexicon_list
+import spotlight
 
 
 def spacer(xs):
@@ -32,11 +33,11 @@ def plural(document):
 
 
 def is_transportation(document):
-    return [['TRANSPORTATION'] if token in transportation else [] for token in document]
+    return [['TRANSPORTATION'] if token in lexicon_list.transportation else [] for token in document]
 
 
 def is_building(document):
-    return [['BUILDING'] if token in buildings else [] for token in document]
+    return [['BUILDING'] if token in lexicon_list.buildings else [] for token in document]
 
 
 def capitalized(document):
@@ -55,6 +56,46 @@ def unique(document):
         seen[token] = 1
     return features
 
+
+def get_pos(offset, document):
+    doc_joined = " ".join(document)
+    beginning = doc_joined[:offset]
+    length = len(beginning.split(" ")) - 1
+    return length
+
+
+def dbpedia_features(document):
+    doc_length = len(document)
+    #URL will be replaced with ec2 ami instance once that is setup
+    annotations = spotlight.annotate('http://spotlight.dbpedia.org/rest/annotate', document, confidence=0.4, support=20)
+    positions = [[] for x in xrange(doc_length)]
+    for a in annotations:
+        surfaceForm = a["surfaceForm"]
+        offset = a["offset"]
+        type = a["types"]
+        all_types = type.split(",")
+        dbpedia_type = all_types[0]
+        pos = get_pos(offset, document)
+        words = surfaceForm.split(" ")
+        len_words = len(words)
+        try:
+            if (len_words > 1):
+                c = pos
+                num = 0
+                while c < pos + len_words:
+                    db = str(dbpedia_type) + "_" + str(num)
+                    positions[c] = [db.upper()]
+                    num = num + 1
+                    c = c + 1
+            else:
+                db = str(dbpedia_type)
+                positions[pos] = [db.upper()]
+                #if has type but is empty string set to "thing"
+                if db == "":
+                    positions[pos] = ["DBpedia:Thing".upper()]
+        except AttributeError:
+            positions[pos] = []
+    return positions
 
 all_feature_functions = [
     unigrams,

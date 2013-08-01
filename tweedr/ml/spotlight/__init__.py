@@ -76,8 +76,7 @@ def _dict_cleanup(dic, dict_type=dict):
                 # Test for an iterable (list, tuple, set)
                 value[0]
                 # Clean up each element in the iterable
-                clean[key] = [_dict_cleanup(element, dict_type)
-                                for element in value]
+                clean[key] = [_dict_cleanup(element, dict_type) for element in value]
             except KeyError:
                 clean[key] = _dict_cleanup(value, dict_type)
         except AttributeError:
@@ -166,8 +165,7 @@ def annotate(address, text, confidence=0.0, support=0,
                                  "JSON: %s" % response.text)
 
     if not 'Resources' in pydict:
-        raise SpotlightException(
-                'No Resources found in spotlight response: %s' % pydict)
+        raise SpotlightException('No Resources found in spotlight response: %s' % pydict)
 
     return [_dict_cleanup(resource) for resource in pydict['Resources']]
 
@@ -200,11 +198,10 @@ def candidates(address, text, confidence=0.0, support=0,
                                  "JSON: %s" % response.text)
 
     if not 'annotation' in pydict:
-        raise SpotlightException(
-                'No annotations found in spotlight response: %s' % pydict)
+        raise SpotlightException('No annotations found in spotlight response: %s' % pydict)
+
     if not 'surfaceForm' in pydict['annotation']:
-        raise SpotlightException(
-                'No surface forms found in spotlight response: %s' % pydict)
+        raise SpotlightException('No surface forms found in spotlight response: %s' % pydict)
 
     # Previously we assumed that the surfaceForm is *always* a list, however
     # depending on how many are returned, this does not have to be the case.

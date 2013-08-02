@@ -1,5 +1,5 @@
 language: python
 python:
   - "2.7"
-install: "python setup.py install"
+install: "pip install . --use-mirrors"
 script: "python setup.py test"

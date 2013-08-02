@@ -1,6 +1,8 @@
 from setuptools import setup, command
+
 import os
 import sys
+import json
 import urllib
 import tarfile
 
@@ -43,9 +45,11 @@ class install_data(command.install.install):
         download_ark_tweet_nlp()
 
 
+package = json.load(open('package.json'))
+
 setup(
     name='tweedr',
-    version='0.0.2',
+    version=str(package['version']),
     packages=['tweedr'],
     install_requires=[
         'bottle',

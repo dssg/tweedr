@@ -1,11 +1,15 @@
 import os
 import sys
+import json
 import logging
 from colorama import Fore, Back, Style
 
 # just resolve this file in the context of the current working directory
 # and find the parent of its directory
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+with open(os.path.join(root, 'package.json')) as fd:
+    package = json.load(fd)
+    __version__ = str(package['version'])
 
 # add SILLY loglevel (above notset=0, below debug=10)
 SILLY = 5

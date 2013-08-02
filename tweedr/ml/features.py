@@ -3,6 +3,8 @@
 #   often the list will contain lists that are 1-long
 import lexicon_list
 import spotlight
+from tweedr.ml.wordnet import hypernyms
+from itertools import izip, chain
 
 
 def spacer(xs):
@@ -97,19 +99,6 @@ def dbpedia_features(document):
             positions[pos] = []
     return positions
 
-all_feature_functions = [
-    unigrams,
-    rbigrams,
-    lbigrams,
-    ctrigrams,
-    plural,
-    is_transportation,
-    is_building,
-    capitalized,
-    numeric,
-    unique,
-]
-
 crf_feature_functions = [
     unigrams,
     plural,
@@ -118,6 +107,13 @@ crf_feature_functions = [
     capitalized,
     numeric,
     unique,
+    hypernyms,
+]
+
+all_feature_functions = crf_feature_functions + [
+    rbigrams,
+    lbigrams,
+    ctrigrams,
 ]
 
 
@@ -126,16 +122,9 @@ def featurize(tokens, feature_functions):
     and then unzip (transpose) and flatten so that we get a N-long list of
     arbitrarily-long lists of strings.
     '''
-    # feature_sets = []
-    # for feature_function in feature_functions:
-    #     feature_set = feature_function(document)
-    #     feature_sets.append(feature_set)
-    # tokens_feature_sets = zip(*feature_sets)
-    # tokens_features = map(flatten, tokens_feature_sets)
-
-    # or replace the previous six lines with:
-    features_groups = [feature_function(tokens) for feature_function in feature_functions]
-    return [sum(tokens_features_group, []) for tokens_features_group in zip(*features_groups)]
+    feature_functions_results = [feature_function(tokens) for feature_function in feature_functions]
+    for token_featuress in izip(*feature_functions_results):
+        yield chain.from_iterable(token_featuress)
 
 
 def main():

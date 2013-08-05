@@ -70,9 +70,6 @@ class AddCount(Mapper):
         self.seen = dict()
 
     def __call__(self, dict_):
-
-        # ignore metadata entries
-
         # get main text. different sources call it different things
         try:
             text = dict_.get('body') or dict_['text']
@@ -80,14 +77,7 @@ class AddCount(Mapper):
             logger.critical('Could not find contentful entry in line: %s', dict_)
             raise
 
-        # 1. classify
-        # 1a. useful? not-useful?
-
-        # 1b. infrastructure? other?
-        # etc.
-
-        # 2. cluster
-        # .add(...) returns True if item is already in the filter
+        # bloomfilter.add(...) returns True if item is already in the filter
         if self.bloomfilter.add(text):
             # we only start to store counts when we see an item more than once
             self.seen[text] = dict_['count'] = self.seen.get(text, 1) + 1

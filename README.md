@@ -167,6 +167,7 @@ And for basic MySQL RDS connectivity:
     export MYSQL_PASS="andthepassword"
     export MYSQL_DATABASE="finallythedatabasename"
 
+You'll probably want to have these values available whenever you're working at the command line, in which case you might want to store them in your `~/.bashrc`, which is (or should be) executed whenever you open a new terminal (shell).
 
 ## License
 

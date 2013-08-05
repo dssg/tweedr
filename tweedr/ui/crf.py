@@ -14,6 +14,8 @@ from tweedr.models import DBSession, TokenizedLabel
 logger = logging.getLogger(__name__)
 
 # tell bottle where to look for templates
+# We use Mako templates (*.mako) that are in the templates/ directory in the package root.
+# There are also Handlebars (*.bars) templates in there, but those are rendered on the client-side.
 bottle.TEMPLATE_PATH.append(os.path.join(tweedr.root, 'templates'))
 
 # this is the primary export
@@ -48,7 +50,7 @@ def index():
 def tokenized_labels_sample():
     total = DBSession.query(TokenizedLabel).count()
     index = random.randrange(total)
-    logger.debug('/random_text: choosing #%d out of %d', index, total)
+    logger.debug('/tokenized_labels/sample: choosing #%d out of %d', index, total)
     tokenized_label = DBSession.query(TokenizedLabel).offset(index).limit(1).first()
     return tokenized_label.__json__()
 
@@ -60,7 +62,7 @@ def tagger_tag():
     text = request.forms.text
     tokens = token_re.findall(text.encode('utf8'))
 
-    tokens_features = featurize(tokens, crf_feature_functions)
+    tokens_features = map(list, featurize(tokens, crf_feature_functions))
     tagger = GLOBALS['tagger']
     labels = list(tagger.tag_raw(tokens_features))
 

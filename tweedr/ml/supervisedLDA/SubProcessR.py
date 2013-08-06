@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from pyper import *
+import pyper as pyr
 
 
 def runSubProcess(cutoff, tweetFile, labelFile):
-    r = R(use_numpy=True, use_pandas=True)
+    r = pyr.R(use_numpy=True, use_pandas=True)
     vocab = tweetFile + '.vocab'
     r.assign('cutoff', cutoff)
     r.assign('tweetFile', tweetFile)
@@ -20,7 +20,7 @@ def runSubProcess(cutoff, tweetFile, labelFile):
 
 
 def runStreaming(tweets):
-    r = R(use_numpy=True, use_pandas=True)
+    r = pyr.R(use_numpy=True, use_pandas=True)
     r.assign('tweets', tweets)
     r.run("source('sLDAStream.R)")
     predictions = r['predictions']
@@ -28,7 +28,7 @@ def runStreaming(tweets):
 
 
 def runTraining(tweets, labels):
-    r = R(use_numpy=True, use_pandas=True)
+    r = pyr.R(use_numpy=True, use_pandas=True)
     r.assign('tweets', tweets)
     r.assign('labels', labels)
 

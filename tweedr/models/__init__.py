@@ -8,7 +8,6 @@ DBSession = sessionmaker()
 # we write enhanced ORM classes directly on top of the schema originals,
 # so that enhancements are optional and transparent
 from tweedr.models import schema
-from schema import *
 
 
 class TokenizedLabel(schema.TokenizedLabel):

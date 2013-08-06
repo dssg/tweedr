@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-from SubProcessR import *
+from SubProcessR import runStreaming, runTraining
 
 
 def runSLDA(tweets, labels):

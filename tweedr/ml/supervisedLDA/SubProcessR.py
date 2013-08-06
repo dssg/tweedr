@@ -19,3 +19,19 @@ def runSubProcess(cutoff, tweetFile, labelFile):
     predictions = r['predictions']
     trueLabels = r['Ytest']
     return (topics, predictions, trueLabels)
+
+
+def runStreaming(tweets):
+    r = R(use_numpy=True, use_pandas=True)
+    r.assign('tweets', tweets)
+    r.run("source('sLDAStream.R)")
+    predictions = r['predictions']
+    return predictions
+
+
+def runTraining(tweets, labels):
+    r = R(use_numpy=True, use_pandas=True)
+    r.assign('tweets', tweets)
+    r.assign('labels', labels)
+
+    r.run("source('sLDATrain.R')")

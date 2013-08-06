@@ -69,7 +69,8 @@ def get_pos(offset, document):
 def dbpedia_features(document):
     doc_length = len(document)
     #URL will be replaced with ec2 ami instance once that is setup
-    annotations = spotlight.annotate('http://spotlight.dbpedia.org/rest/annotate', document, confidence=0.4, support=20)
+    joined_string = (" ").join(document)
+    annotations = spotlight.annotate('http://spotlight.dbpedia.org/rest/annotate', joined_string, confidence=0.4, support=10)
     positions = [[] for x in xrange(doc_length)]
     for a in annotations:
         surfaceForm = a["surfaceForm"]
@@ -81,11 +82,11 @@ def dbpedia_features(document):
         words = surfaceForm.split(" ")
         len_words = len(words)
         try:
-            if (len_words > 1):
+            if (len_words > 1 and str(dbpedia_type) != ""):
                 c = pos
                 num = 0
                 while c < pos + len_words:
-                    db = str(dbpedia_type) + "_" + str(num)
+                    db = str(dbpedia_type)
                     positions[c] = [db.upper()]
                     num = num + 1
                     c = c + 1

@@ -59,6 +59,7 @@ setup(
         'sqlalchemy',
         'ujson',
         'pattern',
+        'pybloomfiltermmap',
     ],
     entry_points={
         'console_scripts': [

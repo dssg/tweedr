@@ -24,7 +24,7 @@ class BaseMixin(object):
 
     def __unicode__(self):
         type_name = self.__class__.__name__
-        pairs = [u'%s=%s' % (k, v) for k, v in self.__json__.items()]
+        pairs = [u'%s=%s' % (k, v) for k, v in self.__json__().items()]
         return u'<%s %s>' % (type_name, u' '.join(pairs))
 
     def __repr__(self):

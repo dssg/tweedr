@@ -59,6 +59,7 @@ setup(
         'mysql-python',
         'pattern',
         'pybloomfiltermmap',
+        'python-hashes',
         'scikit-learn',
         'sqlalchemy',
         'ujson',

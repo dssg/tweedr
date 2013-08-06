@@ -1,141 +1,11 @@
 import sys
-import json
-import pybloomfilter
+
+from tweedr.api import mappers
+from tweedr.api.mappers import similar
+
+
 import logging
-import tempfile
-
 logger = logging.getLogger(__name__)
-
-
-class StringProtocol(object):
-    pass
-
-
-class DictProtocol(object):
-    pass
-
-
-class TweetDictProtocol(DictProtocol):
-    '''This merely asserts that the following fields will exist and have reasonable values:
-
-        text: String
-        id: String
-        author: String
-    '''
-
-
-class Mapper(object):
-    '''Passthrough / interface'''
-    INPUT = DictProtocol
-    OUTPUT = DictProtocol
-
-    def __call__(self, dict_):
-        return dict_
-
-
-class EmptyLineFilter(Mapper):
-    INPUT = StringProtocol
-    OUTPUT = StringProtocol
-
-    def __call__(self, line):
-        # ignore empty lines
-        stripped_line = line.strip()
-        if stripped_line:
-            return stripped_line
-
-
-class JSONParser(Mapper):
-    INPUT = StringProtocol
-    OUTPUT = DictProtocol
-
-    def __call__(self, line):
-        try:
-            return json.loads(line)
-        except ValueError:
-            logger.critical('Could not parse JSON: %s', line)
-            raise
-
-
-class IgnoreMetadata(Mapper):
-    INPUT = DictProtocol
-    OUTPUT = DictProtocol
-
-    def __call__(self, dict_):
-        if 'info' not in dict_:
-            return dict_
-
-
-class TweetStandardizer(Mapper):
-    INPUT = DictProtocol
-    OUTPUT = TweetDictProtocol
-
-    whitespace = {ord('\t'): u' ', ord('\n'): u' ', ord('\r'): u''}
-
-    def __call__(self, dict_):
-        # ensure text. different sources call it different things.
-        if 'text' in dict_:
-            dict_['text'] = dict_['text'].translate(self.whitespace)
-        elif 'body' in dict_:
-            dict_['text'] = dict_.pop('body').translate(self.whitespace)
-        else:
-            logger.critical('Could not find text field in %s', dict_)
-            raise KeyError("'text' | 'body'")
-
-        # ensure author
-        if 'actor' in dict_:
-            dict_['author'] = dict_['actor']['preferredUsername']
-        elif 'user' in dict_:
-            dict_['author'] = dict_['user']['screen_name']
-        else:
-            logger.critical('Could not find author field in %s', dict_)
-            raise KeyError("'actor.preferredUsername' | 'user.screen_name'")
-
-        # ensure id
-        if 'id_str' in dict_:
-            dict_['id'] = dict_['id_str']
-        else:
-            dict_['id'] = dict_['id'].split(':')[-1]
-
-        return dict_
-
-
-class TextCounter(Mapper):
-    INPUT = TweetDictProtocol
-    OUTPUT = TweetDictProtocol
-
-    def __init__(self):
-        # Use an in-memory bloomfilter for now, maybe move to pyreBloom if we need something threadsafe?
-        bloomfilter_filepath = tempfile.NamedTemporaryFile(delete=False).name
-        logger.debug('Saving bloomfilter to %s', bloomfilter_filepath)
-        # pybloomfilter.BloomFilter(capacity, error_rate, filename)
-        self.bloomfilter = pybloomfilter.BloomFilter(10000000, 0.001, bloomfilter_filepath)
-        self.seen = dict()
-
-    def __call__(self, dict_):
-        text = dict_['text']
-
-        # bloomfilter.add(...) returns True if item is already in the filter
-        if self.bloomfilter.add(text):
-            # we only start to store counts when we see an item more than once
-            self.seen[text] = dict_['count'] = self.seen.get(text, 1) + 1
-        else:
-            dict_['count'] = 1
-
-        return dict_
-
-
-class LineStream(Mapper):
-    INPUT = DictProtocol
-    OUTPUT = None
-
-    def __init__(self, stream):
-        self.stream = sys.stdout
-
-    def __call__(self, dict_):
-        json.dump(dict_, self.stream)
-        self.stream.write('\n')
-        # flush might be unnecessary in production
-        self.stream.flush()
 
 
 class Pipeline(object):
@@ -182,12 +52,13 @@ def main():
         raise IOError('You must provide input via STDIN')
 
     pipeline = Pipeline(
-        EmptyLineFilter(),
-        JSONParser(),
-        IgnoreMetadata(),
-        TweetStandardizer(),
-        TextCounter(),
-        LineStream(sys.stdout),
+        mappers.EmptyLineFilter(),
+        mappers.JSONParser(),
+        mappers.IgnoreMetadata(),
+        mappers.TweetStandardizer(),
+        similar.TextCounter(),
+        similar.FuzzyTextCounter(),
+        mappers.LineStream(sys.stdout),
     )
 
     logger.debug('Pipeline created')

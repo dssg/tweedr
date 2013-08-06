@@ -55,6 +55,7 @@ setup(
         'bottle',
         'colorama',
         'mako',
+        'mrjob',
         'mysql-python',
         'pattern',
         'pybloomfiltermmap',

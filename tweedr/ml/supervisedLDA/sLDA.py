@@ -11,6 +11,7 @@ def runSLDA(tweets, labels):
 
     runTraining(tweets, labels)
     predictions = runStreaming(tweets)
+    return predictions
 
 
 def outputJSON(tweets, predictions):

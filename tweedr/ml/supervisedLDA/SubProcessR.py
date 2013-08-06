@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from pyper import *
-import numpy as np
-import pandas as pd
 
 
 def runSubProcess(cutoff, tweetFile, labelFile):

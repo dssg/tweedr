@@ -1,5 +1,5 @@
 import sys
-from tweedr.models import DBSession, TokenizedLabel, Label  # Tweet,
+from tweedr.models import DBSession, TokenizedLabel, Label
 
 print >> sys.stderr, 'Tweet count started.'
 print 'There are %d labels in the database.' % DBSession.query(Label).count()

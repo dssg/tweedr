@@ -22,7 +22,7 @@ from sqlalchemy import Column
 from sqlalchemy.dialects import mysql
 from sqlalchemy.ext.declarative import declarative_base
 
-from tweedr.models.meta import metadata
+from tweedr.models.metadata import metadata
 
 
 class BaseMixin(object):

@@ -15,7 +15,7 @@ import spotlight
 
 @nottest
 def fake_request_post(self, *args, **kwargs):
-    RawResponse = namedtuple('RawResponse', ['reason',])
+    RawResponse = namedtuple('RawResponse', ['reason'])
     hear_me_RawR = RawResponse(reason='Just a fake reason.')
 
     class FakeResponse(spotlight.requests.models.Response):
@@ -123,8 +123,8 @@ def test_single_candidate():
     candidates = spotlight.candidates('http://localhost', 'asdasdasd',
                                       headers={'fake_response': data})
     expected_out = [
-        {u'resource':
-            [
+        {
+            u'resource': [
                 {
                     u'finalScore': 0.8754365122251001,
                     u'support': 3,
@@ -145,9 +145,9 @@ def test_single_candidate():
                     u'priorScore': 5.001541405942121e-06,
                     u'contextualScore': 0.0008186418452925803
                 },
-             ],
-         u'name': u'Technische Universiteit Delft',
-         u'offset': 25
+            ],
+            u'name': u'Technische Universiteit Delft',
+            u'offset': 25
         }
     ]
     eq_(candidates, expected_out)

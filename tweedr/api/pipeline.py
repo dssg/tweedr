@@ -13,9 +13,15 @@ class StringProtocol(object):
 
 class DictProtocol(object):
     pass
-    # @classmethod
-    # def from_json(json_str):
-    #     return json.loads(json_str)
+
+
+class TweetDictProtocol(DictProtocol):
+    '''This merely asserts that the following fields will exist and have reasonable values:
+
+        text: String
+        id: String
+        author: String
+    '''
 
 
 class Mapper(object):
@@ -28,8 +34,8 @@ class Mapper(object):
 
 
 class EmptyLineFilter(Mapper):
-    INPUT = StringProtocol  # default
-    OUTPUT = StringProtocol  # default
+    INPUT = StringProtocol
+    OUTPUT = StringProtocol
 
     def __call__(self, line):
         # ignore empty lines
@@ -39,8 +45,8 @@ class EmptyLineFilter(Mapper):
 
 
 class JSONParser(Mapper):
-    INPUT = StringProtocol  # default
-    OUTPUT = DictProtocol  # default
+    INPUT = StringProtocol
+    OUTPUT = DictProtocol
 
     def __call__(self, line):
         try:
@@ -51,16 +57,52 @@ class JSONParser(Mapper):
 
 
 class IgnoreMetadata(Mapper):
-    # INPUT = DictProtocol  # default
-    # OUTPUT = DictProtocol  # default
+    INPUT = DictProtocol
+    OUTPUT = DictProtocol
+
     def __call__(self, dict_):
         if 'info' not in dict_:
             return dict_
 
 
-class AddCount(Mapper):
-    # INPUT = DictProtocol  # default
-    # OUTPUT = DictProtocol  # default
+class TweetStandardizer(Mapper):
+    INPUT = DictProtocol
+    OUTPUT = TweetDictProtocol
+
+    whitespace = {ord('\t'): u' ', ord('\n'): u' ', ord('\r'): u''}
+
+    def __call__(self, dict_):
+        # ensure text. different sources call it different things.
+        if 'text' in dict_:
+            dict_['text'] = dict_['text'].translate(self.whitespace)
+        elif 'body' in dict_:
+            dict_['text'] = dict_.pop('body').translate(self.whitespace)
+        else:
+            logger.critical('Could not find text field in %s', dict_)
+            raise KeyError("'text' | 'body'")
+
+        # ensure author
+        if 'actor' in dict_:
+            dict_['author'] = dict_['actor']['preferredUsername']
+        elif 'user' in dict_:
+            dict_['author'] = dict_['user']['screen_name']
+        else:
+            logger.critical('Could not find author field in %s', dict_)
+            raise KeyError("'actor.preferredUsername' | 'user.screen_name'")
+
+        # ensure id
+        if 'id_str' in dict_:
+            dict_['id'] = dict_['id_str']
+        else:
+            dict_['id'] = dict_['id'].split(':')[-1]
+
+        return dict_
+
+
+class TextCounter(Mapper):
+    INPUT = TweetDictProtocol
+    OUTPUT = TweetDictProtocol
+
     def __init__(self):
         # Use an in-memory bloomfilter for now, maybe move to pyreBloom if we need something threadsafe?
         bloomfilter_filepath = tempfile.NamedTemporaryFile(delete=False).name
@@ -70,12 +112,7 @@ class AddCount(Mapper):
         self.seen = dict()
 
     def __call__(self, dict_):
-        # get main text. different sources call it different things
-        try:
-            text = dict_.get('body') or dict_['text']
-        except KeyError:
-            logger.critical('Could not find contentful entry in line: %s', dict_)
-            raise
+        text = dict_['text']
 
         # bloomfilter.add(...) returns True if item is already in the filter
         if self.bloomfilter.add(text):
@@ -88,7 +125,7 @@ class AddCount(Mapper):
 
 
 class LineStream(Mapper):
-    INPUT = DictProtocol  # default
+    INPUT = DictProtocol
     OUTPUT = None
 
     def __init__(self, stream):
@@ -102,25 +139,29 @@ class LineStream(Mapper):
 
 
 class Pipeline(object):
-    def __init__(self, *pipes):
-        logger.info('%s -> [pipeline] -> %s', pipes[0].INPUT, pipes[-1].OUTPUT)
-        # type-check the connections between the provided pipes
+    def __init__(self, *mappers):
+        logger.info('%s -> [pipeline] -> %s', mappers[0].INPUT, mappers[-1].OUTPUT)
+        # type-check the connections between the provided mappers
         total_errors = 0
-        for pipe_out, pipe_in in zip(pipes, pipes[1:]):
-            if pipe_out.OUTPUT != pipe_in.INPUT:
-                logger.error('Pipeline cannot connect pipes: %s[%s] -> %s[%s]',
-                    pipe_out.__class__.__name__, pipe_out.OUTPUT.__name__,
-                    pipe_in.__class__.__name__, pipe_in.INPUT.__name__)
+        for from_pipe, to_pipe in zip(mappers, mappers[1:]):
+            # Python lets you use `a <= b` to say `a is a subclass of b`
+            # SuperClass >= Class is true
+            # Class >= Class is true
+            # Class >= SuperClass is false
+            if from_pipe.OUTPUT < to_pipe.INPUT:
+                logger.error('Pipeline cannot connect mappers: %s[%s] -> %s[%s]',
+                    from_pipe.__class__.__name__, from_pipe.OUTPUT.__name__,
+                    to_pipe.__class__.__name__, to_pipe.INPUT.__name__)
                 total_errors += 1
         if total_errors > 0:
             raise TypeError('Pipeline types do not match!')
-        self.pipes = pipes
+        self.mappers = mappers
 
     def __call__(self, payload):
         logger.notset('Pipeline processing payload: %s', payload)
         # TODO: maybe wrap with a try-except here?
-        for pipe in self.pipes:
-            payload = pipe(payload)
+        for mapper in self.mappers:
+            payload = mapper(payload)
             if payload is None:
                 break
         return payload
@@ -144,7 +185,8 @@ def main():
         EmptyLineFilter(),
         JSONParser(),
         IgnoreMetadata(),
-        AddCount(),
+        TweetStandardizer(),
+        TextCounter(),
         LineStream(sys.stdout),
     )
 

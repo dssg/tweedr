@@ -7,10 +7,17 @@ DBSession = sessionmaker()
 
 # we write enhanced ORM classes directly on top of the schema originals,
 # so that enhancements are optional and transparent
-from tweedr.models import schema
+from schema import (
+    DamageClassification,  # pyflakes.ignore
+    TokenizedLabel,  # pyflakes.ignore
+    UniformSample,  # pyflakes.ignore
+    Label,  # pyflakes.ignore
+    KeywordSample,  # pyflakes.ignore
+    Tweet,  # pyflakes.ignore
+)
 
 
-class TokenizedLabel(schema.TokenizedLabel):
+class TokenizedLabel(TokenizedLabel):
     @property
     def tokens(self):
         return token_re.findall(unicode(self.tweet).encode('utf8'))

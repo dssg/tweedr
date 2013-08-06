@@ -66,13 +66,16 @@ def tagger_tag():
     tagger = GLOBALS['tagger']
     labels = list(tagger.tag_raw(tokens_features))
 
-    return {
-        'sequences': [
-            {'name': 'tokens', 'values': tokens},
-            {'name': 'features', 'values': [' '.join(token_features) for token_features in tokens_features]},
-            {'name': 'labels', 'values': labels},
-        ]
-    }
+    sequences = [
+        {'name': 'tokens', 'values': tokens},
+        {'name': 'labels', 'values': labels},
+    ]
+    for feature_function in crf_feature_functions:
+        sequences.append({
+            'name': feature_function.__name__,
+            'values': [', '.join(features) for features in feature_function(tokens)]})
+
+    return {'sequences': sequences}
 
 
 @app.route('/tagger/retrain')

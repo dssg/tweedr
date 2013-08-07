@@ -23,9 +23,10 @@ class TestFormatting(unittest.TestCase):
 
     def test_pyflakes(self):
         '''Running pyflakes checks recursively in %s''' % tweedr.root
-        # pyflakes.checkRecursive(paths, reporter) but reporter does not default to None,
-        #   though a None reporter is replaced with the default later down the line
-        total_errors = pyflakes.checkRecursive([tweedr.root], None)
+        total_errors = 0
+        py_check = lambda s: '.egg' not in s and '/.git/' not in s and s.endswith('.py')
+        for filepath in walk(tweedr.root, py_check):
+            total_errors += pyflakes.checkPath(filepath)
 
         self.assertEqual(total_errors, 0, 'Codebase does not pass pyflakes (%d errors)' % total_errors)
 
@@ -34,13 +35,12 @@ class TestFormatting(unittest.TestCase):
         total_errors = 0
         source_endings = ('.py', '.bars', '.js', '.md', '.txt', '.mako', '.yml', '.less', '.json', '.css')
         source_check = lambda s: '/static/lib/' not in s and '/.git/' not in s and s.endswith(source_endings)
-        for filepath_i, filepath in enumerate(walk(tweedr.root, source_check)):
+        for filepath in walk(tweedr.root, source_check):
             with open(filepath) as fp:
                 for line_i, raw in enumerate(fp):
                     line = raw.rstrip('\n')
                     if line.endswith((' ', '\t')):
                         print >> sys.stderr, '%s:%d: trailing whitespace' % (filepath, line_i + 1)
                         total_errors += 1
-        # print 'Checked %d files with extensions: %s' % (filepath_i, ', '.join(source_endings))
 
         self.assertEqual(total_errors, 0, 'Codebase has trailing whitespace (%d errors)' % total_errors)

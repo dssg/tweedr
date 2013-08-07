@@ -21,7 +21,8 @@ def runSubProcess(cutoff, tweetFile, labelFile):
 def runStreaming(tweets):
     r = pyr.R(use_numpy=True, use_pandas=True)
     r.assign('tweets', tweets)
-    r.run("source('sLDAStream.R)")
+
+    r.run("source('sLDAStream.R')")
     predictions = r['predictions']
     return predictions
 

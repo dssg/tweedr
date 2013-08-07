@@ -3,15 +3,16 @@
 
 import json
 from SubProcessR import runStreaming, runTraining
-from PreProcess import processTweet, is_ascii
+import PreProcess
 
 
 def runSLDA(tweets, labels):
 
 # Pre-Process Tweets and Labels Here?
 
-    tweets = map(lambda x: processTweet(x), tweets)
-    tweets = [(tweet if is_ascii(tweet) else ' ') for tweet in tweets]
+    tweets = map(lambda x: PreProcess.processTweet(x), tweets)
+    tweets = [(tweet if PreProcess.is_ascii(tweet) else ' ')
+              for tweet in tweets]
     tweets = map(lambda x: str(x).translate(None, '"'), tweets)
     (tweets_filters, labels_filters) = ([], [])
     for (i, tweet) in enumerate(tweets):
@@ -20,8 +21,9 @@ def runSLDA(tweets, labels):
             labels_filters.append(labels[i])
 
     runTraining(tweets_filters, labels_filters)
+    print 'Done Training'
     predictions = runStreaming(tweets_filters)
-    return predictions
+    return (predictions, labels_filters)
 
 
 def outputJSON(tweets, predictions):

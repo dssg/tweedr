@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from pyper import *
+from pyper import R
 
 
 def runSubProcess(cutoff, tweetFile, labelFile):
@@ -16,11 +16,12 @@ def runSubProcess(cutoff, tweetFile, labelFile):
     topics = r['Topics']
     predictions = r['predictions']
     trueLabels = r['Ytest']
-    return (topics, predictions, trueLabels)
+    return (predictions, trueLabels)
 
 
 def runStreaming(tweets):
     r = R(use_numpy=True, use_pandas=True)
+    print "Testing"
     r.assign('tweets', tweets)
     r.run("source('sLDAStream.R)")
     predictions = r['predictions']
@@ -33,3 +34,4 @@ def runTraining(tweets, labels):
     r.assign('labels', labels)
 
     r.run("source('sLDATrain.R')")
+    print r['documents']

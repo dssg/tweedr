@@ -8,13 +8,16 @@ DBSession = sessionmaker()
 # we write enhanced ORM classes directly on top of the schema originals,
 # so that enhancements are optional and transparent
 from schema import (
-    DamageClassification,  # pyflakes.ignore
-    TokenizedLabel,  # pyflakes.ignore
-    UniformSample,  # pyflakes.ignore
-    Label,  # pyflakes.ignore
-    KeywordSample,  # pyflakes.ignore
-    Tweet,  # pyflakes.ignore
+    DamageClassification,
+    TokenizedLabel,
+    UniformSample,
+    Label,
+    KeywordSample,
+    Tweet,
 )
+
+# This quiets the 'import unused' pyflakes warning
+__all__ = ['DamageClassification', 'TokenizedLabel', 'UniformSample', 'Label', 'KeywordSample', 'Tweet']
 
 
 class TokenizedLabel(TokenizedLabel):

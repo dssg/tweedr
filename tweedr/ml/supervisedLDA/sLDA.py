@@ -3,8 +3,11 @@
 
 import json
 from SubProcessR import runStreaming, runTraining
+<<<<<<< HEAD
 from PreProcess import processTweet, is_ascii
 import csv
+=======
+>>>>>>> 246f9cdaa38305ba824588b4e8e2937022ef2e65
 
 
 def runSLDA(tweets, labels):

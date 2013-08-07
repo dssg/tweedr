@@ -2,6 +2,7 @@
 *.egg-info
 .DS_Store
 .DS_Store.orig
+/*.egg
 /ext/
 /dist/
 /build/

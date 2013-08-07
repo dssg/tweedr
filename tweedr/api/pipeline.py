@@ -1,126 +1,37 @@
 import sys
-import json
-import pybloomfilter
-import logging
-import tempfile
 
+from tweedr.api import mappers
+from tweedr.api.mappers import similar
+
+
+import logging
 logger = logging.getLogger(__name__)
 
 
-class StringProtocol(object):
-    pass
-
-
-class DictProtocol(object):
-    pass
-    # @classmethod
-    # def from_json(json_str):
-    #     return json.loads(json_str)
-
-
-class Mapper(object):
-    '''Passthrough / interface'''
-    INPUT = DictProtocol
-    OUTPUT = DictProtocol
-
-    def __call__(self, dict_):
-        return dict_
-
-
-class EmptyLineFilter(Mapper):
-    INPUT = StringProtocol  # default
-    OUTPUT = StringProtocol  # default
-
-    def __call__(self, line):
-        # ignore empty lines
-        stripped_line = line.strip()
-        if stripped_line:
-            return stripped_line
-
-
-class JSONParser(Mapper):
-    INPUT = StringProtocol  # default
-    OUTPUT = DictProtocol  # default
-
-    def __call__(self, line):
-        try:
-            return json.loads(line)
-        except ValueError:
-            logger.critical('Could not parse JSON: %s', line)
-            raise
-
-
-class IgnoreMetadata(Mapper):
-    # INPUT = DictProtocol  # default
-    # OUTPUT = DictProtocol  # default
-    def __call__(self, dict_):
-        if 'info' not in dict_:
-            return dict_
-
-
-class AddCount(Mapper):
-    # INPUT = DictProtocol  # default
-    # OUTPUT = DictProtocol  # default
-    def __init__(self):
-        # Use an in-memory bloomfilter for now, maybe move to pyreBloom if we need something threadsafe?
-        bloomfilter_filepath = tempfile.NamedTemporaryFile(delete=False).name
-        logger.debug('Saving bloomfilter to %s', bloomfilter_filepath)
-        # pybloomfilter.BloomFilter(capacity, error_rate, filename)
-        self.bloomfilter = pybloomfilter.BloomFilter(10000000, 0.001, bloomfilter_filepath)
-        self.seen = dict()
-
-    def __call__(self, dict_):
-        # get main text. different sources call it different things
-        try:
-            text = dict_.get('body') or dict_['text']
-        except KeyError:
-            logger.critical('Could not find contentful entry in line: %s', dict_)
-            raise
-
-        # bloomfilter.add(...) returns True if item is already in the filter
-        if self.bloomfilter.add(text):
-            # we only start to store counts when we see an item more than once
-            self.seen[text] = dict_['count'] = self.seen.get(text, 1) + 1
-        else:
-            dict_['count'] = 1
-
-        return dict_
-
-
-class LineStream(Mapper):
-    INPUT = DictProtocol  # default
-    OUTPUT = None
-
-    def __init__(self, stream):
-        self.stream = sys.stdout
-
-    def __call__(self, dict_):
-        json.dump(dict_, self.stream)
-        self.stream.write('\n')
-        # flush might be unnecessary in production
-        self.stream.flush()
-
-
 class Pipeline(object):
-    def __init__(self, *pipes):
-        logger.info('%s -> [pipeline] -> %s', pipes[0].INPUT, pipes[-1].OUTPUT)
-        # type-check the connections between the provided pipes
+    def __init__(self, *mappers):
+        logger.info('%s -> [pipeline] -> %s', mappers[0].INPUT, mappers[-1].OUTPUT)
+        # type-check the connections between the provided mappers
         total_errors = 0
-        for pipe_out, pipe_in in zip(pipes, pipes[1:]):
-            if pipe_out.OUTPUT != pipe_in.INPUT:
-                logger.error('Pipeline cannot connect pipes: %s[%s] -> %s[%s]',
-                    pipe_out.__class__.__name__, pipe_out.OUTPUT.__name__,
-                    pipe_in.__class__.__name__, pipe_in.INPUT.__name__)
+        for from_pipe, to_pipe in zip(mappers, mappers[1:]):
+            # Python lets you use `a <= b` to say `a is a subclass of b`
+            # SuperClass >= Class is true
+            # Class >= Class is true
+            # Class >= SuperClass is false
+            if from_pipe.OUTPUT < to_pipe.INPUT:
+                logger.error('Pipeline cannot connect mappers: %s[%s] -> %s[%s]',
+                    from_pipe.__class__.__name__, from_pipe.OUTPUT.__name__,
+                    to_pipe.__class__.__name__, to_pipe.INPUT.__name__)
                 total_errors += 1
         if total_errors > 0:
             raise TypeError('Pipeline types do not match!')
-        self.pipes = pipes
+        self.mappers = mappers
 
     def __call__(self, payload):
         logger.notset('Pipeline processing payload: %s', payload)
         # TODO: maybe wrap with a try-except here?
-        for pipe in self.pipes:
-            payload = pipe(payload)
+        for mapper in self.mappers:
+            payload = mapper(payload)
             if payload is None:
                 break
         return payload
@@ -141,11 +52,13 @@ def main():
         raise IOError('You must provide input via STDIN')
 
     pipeline = Pipeline(
-        EmptyLineFilter(),
-        JSONParser(),
-        IgnoreMetadata(),
-        AddCount(),
-        LineStream(sys.stdout),
+        mappers.EmptyLineFilter(),
+        mappers.JSONParser(),
+        mappers.IgnoreMetadata(),
+        mappers.TweetStandardizer(),
+        similar.TextCounter(),
+        similar.FuzzyTextCounter(),
+        mappers.LineStream(sys.stdout),
     )
 
     logger.debug('Pipeline created')

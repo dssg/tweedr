@@ -11,6 +11,18 @@ punctuation_translations = dict(
     [(ord(char), u' ') for char in punctuation_elisions])
 
 
+def UpperCamelCase(name):
+    return re.sub('(^|-|_)(.)', lambda g: g.group(2).upper(), name)
+
+
+def underscore(name):
+    return re.sub('([A-Z]+)', r'_\1', name).strip('_').lower()
+
+
+def singular(name):
+    return re.sub('s$', '', name)
+
+
 def gloss(alignments, prefixes=None, postfixes=None, width=None, toksep=' ', linesep='\n', groupsep='\n'):
     '''
     Creates an interlinear gloss.

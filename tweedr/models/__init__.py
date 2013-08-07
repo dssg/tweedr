@@ -1,48 +1,23 @@
-import os
+from sqlalchemy import orm
 from tweedr.lib.text import token_re
+from tweedr.models.metadata import engine
 
-from sqlalchemy import create_engine, MetaData  # , Table
-from sqlalchemy.ext.declarative import declarative_base, DeferredReflection
-from sqlalchemy.orm import sessionmaker as sessionmakermaker
-
-connection_string = 'mysql+mysqldb://%(MYSQL_USER)s:%(MYSQL_PASS)s@%(MYSQL_HOST)s/%(MYSQL_DATABASE)s' % os.environ
-engine = create_engine(connection_string, encoding='latin1', convert_unicode=True)
-# yep, it's latin1. Check it:
-# mysql -h host-stuff-here.rds.amazonaws.com -u ourusername -p
-# SHOW DATABASES;
-# USE THEDATABASEWITHSTUFFINIT;
-# SHOW VARIABLES LIKE "character_set_database";
-sessionmaker = sessionmakermaker(bind=engine)
+sessionmaker = orm.sessionmaker(bind=engine)
 DBSession = sessionmaker()
-metadata = MetaData(bind=engine)
+
+# we write enhanced ORM classes directly on top of the schema originals,
+# so that enhancements are optional and transparent
+from schema import (
+    DamageClassification,  # pyflakes.ignore
+    TokenizedLabel,  # pyflakes.ignore
+    UniformSample,  # pyflakes.ignore
+    Label,  # pyflakes.ignore
+    KeywordSample,  # pyflakes.ignore
+    Tweet,  # pyflakes.ignore
+)
 
 
-class BaseMixin(object):
-    def __json__(self):
-        # this serves to both copy the record's values as well as filter out the special sqlalchemy key
-        return dict((k, v) for k, v in self.__dict__.items() if k != '_sa_instance_state')
-
-    def __unicode__(self):
-        type_name = self.__class__.__name__
-        pairs = [u'%s=%s' % (k, v) for k, v in self.__json__().items()]
-        return u'<%s %s>' % (type_name, u' '.join(pairs))
-
-    def __repr__(self):
-        return unicode(self).encode('utf-8')
-
-
-Base = declarative_base(metadata=metadata, cls=BaseMixin)
-
-
-class Label(DeferredReflection, Base):
-    # __table__ = Table('labels', metadata, autoload=True)
-    __tablename__ = 'labels'
-
-
-class TokenizedLabel(DeferredReflection, Base):
-    # __table__ = Table('tokenized_labels', metadata, autoload=True)
-    __tablename__ = 'tokenized_labels'
-
+class TokenizedLabel(TokenizedLabel):
     @property
     def tokens(self):
         return token_re.findall(unicode(self.tweet).encode('utf8'))
@@ -62,12 +37,3 @@ class TokenizedLabel(DeferredReflection, Base):
                 # should I let the user set the NA label?
                 labels.append(None)
         return [unicode(label).encode('utf8') for label in labels]
-
-
-class Tweet(DeferredReflection, Base):
-    # __table__ = Table('tweets', metadata, autoload=True)
-    __tablename__ = 'tweets'
-
-# DeferredReflection is just as slow as the __table__(autoload=True) calls.
-# I thought it might be faster, but not really.
-DeferredReflection.prepare(engine)

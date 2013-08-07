@@ -54,12 +54,15 @@ setup(
     install_requires=[
         'bottle',
         'colorama',
+        'mako',
+        'mrjob',
         'mysql-python',
+        'pattern',
+        'pybloomfiltermmap',
+        'python-hashes',
         'scikit-learn',
         'sqlalchemy',
         'ujson',
-        'pattern',
-        'pybloomfiltermmap',
     ],
     entry_points={
         'console_scripts': [

@@ -8,7 +8,7 @@ from sklearn import cross_validation  # , metrics
 # from sklearn.feature_extraction import text
 
 from tweedr.lib.text import gloss
-from tweedr.models import DBSession, TokenizedLabel  # , Label
+from tweedr.models import DBSession, TokenizedLabel
 from tweedr.ml import crf, print_metrics_summary, compare_labels
 from tweedr.ml.features import crf_feature_functions, featurize
 

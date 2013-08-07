@@ -117,6 +117,10 @@ all_feature_functions = crf_feature_functions + [
     ctrigrams,
 ]
 
+classifier_feature_functions = [
+    unigrams,
+]
+
 
 def featurize(tokens, feature_functions):
     '''Take a N-long list of strings (natural text), apply each feature function,

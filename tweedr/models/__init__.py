@@ -20,6 +20,19 @@ from schema import (
 __all__ = ['DamageClassification', 'TokenizedLabel', 'UniformSample', 'Label', 'KeywordSample', 'Tweet']
 
 
+class DamageClassification(DamageClassification):
+
+    @property
+    def text(self):
+        # FIXME: need to lookup in table indicated by which_sample field.
+        # do this in lazy way and cache results.
+        pass
+
+    @property
+    def label(self):
+        pass
+
+
 class TokenizedLabel(TokenizedLabel):
     @property
     def tokens(self):

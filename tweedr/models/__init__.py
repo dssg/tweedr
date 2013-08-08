@@ -24,13 +24,23 @@ class DamageClassification(DamageClassification):
 
     @property
     def text(self):
-        # FIXME: need to lookup in table indicated by which_sample field.
-        # do this in lazy way and cache results.
-        pass
+        'Run join query to get text of this labeled tweet'
+        # FIXME: Slow. Consider join in instead.
+        if not hasattr(self, 'text_'):
+            if 'uniform' in self.which_sample:
+                self.text_ = DBSession.query(UniformSample.text).filter(UniformSample.dssg_id == self.DSSG_ID).first()[0]
+            elif 'keyword' in self.which_sample:
+                self.text_ = DBSession.query(KeywordSample.text).filter(KeywordSample.dssg_id == self.DSSG_ID).first()[0]
+            else:
+                self.text_ = None
+        return self.text_
 
     @property
     def label(self):
-        pass
+        if self.Infrastructure == 1 or self.Casualty == 1:
+            return 1.
+        else:
+            return 0.
 
 
 class TokenizedLabel(TokenizedLabel):

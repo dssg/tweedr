@@ -1,3 +1,5 @@
+'Damage classifier wrapper. In progress.'
+
 import os
 import logging
 import tempfile
@@ -24,12 +26,6 @@ class ItemSequence():
 
 
 class Trainer():
-    """
-    Inherit crfsuite.Trainer to implement message() function, which receives
-    progress messages from a training process.
-    """
-    def message(self, s):
-        logger.silly('Trainer.message: %s', s.strip())
 
     def append_raw(self, features_iter, labels):
         # len(labels) = len(features_iter) = length of sentence / sequence

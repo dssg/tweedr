@@ -1,49 +1,5 @@
-from sklearn import base, metrics
+from sklearn import metrics
 from tweedr.lib import Counts
-
-
-class ClassifierI(base.ClassifierMixin):
-    '''
-    I realize using this isn't Pythonic, but it's a way to remind myself what
-    method sklearn-type classifiers are expected to implement.
-
-    * `X`: an iterable of data points, each of which might be a point in many-dimensional space, a list of strings, etc.
-    * `y`: an iterable of discrete labels, each of which may be a string, or a True/False value, or just an integer (not a float).
-    '''
-    def __init__(self, *args, **kw):
-        pass
-
-    # def decision_function(self, X):
-    #     '''Predict confidence scores for samples.'''
-    #     raise NotImplementedError(__doc__)
-
-    def fit(X, y):
-        '''Fit the model according to the given training data.'''
-        raise NotImplementedError(__doc__)
-
-    def fit_transform(X, y=None):
-        '''Fit to data, then transform it'''
-        raise NotImplementedError(__doc__)
-
-    def get_params(deep=False):
-        '''Get parameters for the estimator'''
-        raise NotImplementedError(__doc__)
-
-    def predict(X):
-        '''Predict class labels for samples in X.'''
-        raise NotImplementedError(__doc__)
-
-    # def score(X, y):
-    #     '''Returns the mean accuracy on the given test data and labels.'''
-    #     raise NotImplementedError(__doc__)
-
-    def set_params(**params):
-        '''Set the parameters of the estimator.'''
-        raise NotImplementedError(__doc__)
-
-    def transform(X, threshold=None):
-        '''Reduce X to its most important features.'''
-        raise NotImplementedError(__doc__)
 
 
 def print_metrics_summary(gold_labels, predicted_labels, sample=0):
@@ -63,6 +19,12 @@ def print_metrics_summary(gold_labels, predicted_labels, sample=0):
 
 
 def compare_labels(gold_labels, predicted_labels, null_label):
+    # produces a Counts object with values:
+    #  .true_positives
+    #  .false_negatives
+    #  .true_negatives
+    #  .false_positives
+    #  .comparisons = SUM of the others
     counts = Counts()
     for gold_label, predicted_label in zip(gold_labels, predicted_labels):
         counts.comparisons += 1

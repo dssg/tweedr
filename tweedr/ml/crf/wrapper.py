@@ -1,39 +1,12 @@
-# Trainer and Tagger come pretty much directly from
-#   git://github.com/chbrown/nlp.git/python/det/crf.py, which is MIT Licensed
 import os
 import crfsuite
-import logging
 import tempfile
 
-from tweedr.ml import ClassifierI
+from tweedr.ml.crf import ItemSequence
 from tweedr.ml.features import featurize
 
-
+import logging
 logger = logging.getLogger(__name__)
-version = crfsuite.version()
-
-
-class ItemSequence(crfsuite.ItemSequence):
-    def __init__(self, features_iter):
-        '''Create new ItemSequence, typedef std::vector<Item> based on the
-        given iterable of iterable of 2-tuples or strings'''
-        super(ItemSequence, self).__init__()
-        self.append_raw(features_iter)
-
-    def append_raw(self, features_iter):
-        '''
-        @features_iter is an iterable of iterables, of tuples or strings.
-            type: [[(str, float) | str]], where [] is an iterable
-        '''
-        for features in features_iter:
-            item = crfsuite.Item()
-            for feature in features:
-                if isinstance(feature, tuple):
-                    attribute = crfsuite.Attribute(*feature)
-                else:
-                    attribute = crfsuite.Attribute(feature)
-                item.append(attribute)
-            self.append(item)
 
 
 class Trainer(crfsuite.Trainer):
@@ -113,9 +86,3 @@ class Tagger(crfsuite.Tagger):
             logger.debug('Loading existing model from %s', model_filepath)
 
         return cls(model_filepath)
-
-
-class CRFClassifier(ClassifierI):
-    '''Doesn't fit entirely within the classifier paradigm, due to the hierarchy of data:
-    Sentences have each token labeled, but each sentence is an individual entity.
-    '''

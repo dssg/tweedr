@@ -1,4 +1,3 @@
-# this import also triggers training the CRF tagger global in ui/crf.py
 from bottle import run
 from tweedr.ui.middleware import add_duration_header
 
@@ -12,6 +11,7 @@ def main():
     I recommend using 3rd party restarter, say, node_restarter:
         node_restarter **/*.py **/*.css **/*.mako 'python tweedr/ui/__init__.py'
     '''
+    # this import also triggers training the CRF tagger global in ui/crf.py
     from tweedr.ui.crf import app
     app = add_duration_header(app)
     run(app, reloader=False)

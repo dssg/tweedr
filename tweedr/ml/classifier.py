@@ -1,95 +1,50 @@
-'Damage classifier wrapper. In progress.'
+'''I recommend emulating the scikit-learn interface, with or without
+ClassifierI because fit and predict are more descriptive names than append_raw
+and save, etc. In the CRF case, it's less transparent how to access the
+underlying tagger/trainer but I think as long as it's following the sklearn
+paradigm, an opaque wrapper is okay.
+'''
+from sklearn import base
 
-import os
 import logging
-import tempfile
-
-from tweedr.ml.features import featurize
-
-
 logger = logging.getLogger(__name__)
 
 
-class ItemSequence():
-    def __init__(self, features_iter):
-        '''Create new ItemSequence, typedef std::vector<Item> based on the
-        given iterable of iterable of 2-tuples or strings'''
-        self.append_raw(features_iter)
+class ClassifierI(base.ClassifierMixin):
+    '''
+    Interface to emulate sklearn classifiers.
 
-    def append_raw(self, features_iter):
-        '''
-        @features_iter is an iterable of iterables, of tuples or strings.
-            type: [[(str, float) | str]], where [] is an iterable
-        '''
-        # FIXME: convert raw to vector
+    * `X`: an iterable of data points, each of which might be a point in many-dimensional space, a list of strings, etc.
+    * `y`: an iterable of discrete labels, each of which may be a string, or a True/False value, or just an integer (not a float).
+    '''
+    def __init__(self, *args, **kw):
         pass
 
+    def fit(self, X, y):
+        '''Fit the model according to the given training data.'''
+        raise NotImplementedError(__doc__)
 
-class Trainer():
+    def fit_transform(self, X, y=None):
+        '''Fit to some data, then transform it'''
+        self.fit(X, y)
+        return self.transform(X)
 
-    def append_raw(self, features_iter, labels):
-        # len(labels) = len(features_iter) = length of sentence / sequence
-        # labels is a tuple of strings, features_iter is an tuple/list of variable-length lists of strings.
-        # this just wraps all the data / labels with crfsuite types
-        items = ItemSequence(features_iter)
-        # labels = crfsuite.StringList(labels)
-        self.append(items, tuple(labels), 0)
+    def get_params(self, deep=False):
+        '''Get parameters for the estimator'''
+        raise NotImplementedError(__doc__)
 
-    def save(self, model_path):
-        # Trainer.select(algorithm, type): Initialize the training algorithm and set type of graphical model
-        # lbfgs is the default algorithm
-        # l2sgd is L2-regularized SGD
-        # crf1d is 1st-order dyad features.
-        self.select('l2sgd', 'crf1d')
+    def predict(self, X):
+        '''Predict class labels for samples in X.'''
+        raise NotImplementedError(__doc__)
 
-        # Set the coefficient for L2 regularization to 0.1
-        # potential values change based on algorithm previously selected
-        # See http://www.chokkan.org/software/crfsuite/manual.html
-        self.set('c2', '0.1')
+    # def score(self, X, y):
+    #     '''Returns the mean accuracy on the given test data and labels.'''
+    #     raise NotImplementedError(__doc__)
 
-        # Start training; the training process will invoke trainer.message()
-        # to report the progress.
-        self.train(model_path, -1)
+    def set_params(self, **params):
+        '''Set the parameters of the estimator.'''
+        raise NotImplementedError(__doc__)
 
-        # print 'After training: params and their values'
-        # for name in trainer.params():
-        #     print name, trainer.get(name), trainer.help(name)
-
-
-class Classifier():
-    def __init__(self, model_path):
-        # FIXME: unpickle model
-        pass
-
-    def classify_raw(self, features_iter):
-        '''
-        Obtain the label predicted by the classifier.
-
-        This returns a list of (class,probability) tuples
-        '''
-        pass
-
-    @classmethod
-    def from_path_or_data(cls, data, feature_functions, model_filepath=None):
-        '''If we are given a model_filepath that points to an existing file, use it.
-        otherwise, create a temporary file to store the model because CRFSuite
-        doesn't seem to allow us to create a tagger directly from a trained
-        trainer object.'''
-        if model_filepath is None or not os.path.exists(model_filepath):
-            if model_filepath is None:
-                model_filepath = tempfile.NamedTemporaryFile(delete=False).name
-
-            trainer = Trainer()
-            for i, datum in enumerate(data):
-                tokens = datum.tokens
-                labels = datum.labels
-
-                tokens_features = featurize(tokens, feature_functions)
-                trainer.append_raw(tokens_features, labels)
-            # This is where the training happens
-            trainer.save(model_filepath)
-            logger.debug('Trained on %d instances and saved to %s', i, model_filepath)
-        else:
-            logger.debug('Loading existing model from %s', model_filepath)
-
-        return cls(model_filepath)
+    def transform(self, X, threshold=None):
+        '''Reduce X to its most important features.'''
+        raise NotImplementedError(__doc__)

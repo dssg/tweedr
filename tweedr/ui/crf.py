@@ -1,5 +1,4 @@
 import os
-import logging
 import random
 
 import bottle
@@ -7,10 +6,11 @@ from bottle import request, redirect, static_file, mako_view as view
 
 import tweedr
 from tweedr.lib.text import token_re
-from tweedr.ml import crf
+from tweedr.ml.crf.classifier import CRF
 from tweedr.ml.features import crf_feature_functions, featurize
 from tweedr.models import DBSession, TokenizedLabel
 
+import logging
 logger = logging.getLogger(__name__)
 
 # tell bottle where to look for templates
@@ -22,15 +22,20 @@ bottle.TEMPLATE_PATH.append(os.path.join(tweedr.root, 'templates'))
 app = bottle.Bottle()
 
 # globals are messy, but we don't to retrain a tagger for every request
-GLOBALS = dict(tagger=None)
+GLOBALS = dict()
+crf_model_filepath = '/tmp/tweedr.ui.crf.model'
 
 
 def initialize():
-    query = DBSession.query(TokenizedLabel).limit(1000)
     logger.debug('initializing %s', __name__)
-    tmp_filepath = '/tmp/tweedr.ui.crf.model'
-    tagger = crf.Tagger.from_path_or_data(query, crf_feature_functions, model_filepath=tmp_filepath)
-    GLOBALS['tagger'] = tagger
+    if os.path.exists(crf_model_filepath):
+        GLOBALS['tagger'] = CRF.from_file(crf_model_filepath)
+    else:
+        query = DBSession.query(TokenizedLabel).limit(10000)
+        crf = CRF.from_data(query)
+        crf.save(crf_model_filepath)
+        GLOBALS['tagger'] = crf
+
 
 initialize()
 
@@ -64,7 +69,7 @@ def tagger_tag():
 
     tokens_features = map(list, featurize(tokens, crf_feature_functions))
     tagger = GLOBALS['tagger']
-    labels = list(tagger.tag_raw(tokens_features))
+    labels = tagger.predict([tokens_features])[0]
 
     sequences = [
         {'name': 'tokens', 'values': tokens},
@@ -80,9 +85,8 @@ def tagger_tag():
 
 @app.route('/tagger/retrain')
 def tagger_retrain():
-    query = DBSession.query(TokenizedLabel).limit(10000)
-    tagger = crf.Tagger.from_path_or_data(query, crf_feature_functions)
-    GLOBALS['tagger'] = tagger
+    os.remove(crf_model_filepath)
+    initialize()
     return dict(success=True)
 
 

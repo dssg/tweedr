@@ -1,7 +1,7 @@
 import sys
 
 from tweedr.api import mappers
-from tweedr.api.mappers import similar
+from tweedr.api.mappers import similar, nlp
 
 
 import logging
@@ -58,6 +58,7 @@ def main():
         mappers.TweetStandardizer(),
         similar.TextCounter(),
         similar.FuzzyTextCounter(),
+        nlp.POSTagger(),
         mappers.LineStream(sys.stdout),
     )
 
@@ -67,7 +68,7 @@ def main():
         for i, line in enumerate(sys.stdin):
             pipeline(line)
     except KeyboardInterrupt:
-        print 'SIGINT received; Exiting.'
+        logger.error('SIGINT received; Exiting.')
 
     logger.info('Processed %d lines', i)
     logger.debug('Pipeline exited')

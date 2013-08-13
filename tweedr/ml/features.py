@@ -68,37 +68,22 @@ def get_pos(offset, document):
 
 def dbpedia_features(document):
     doc_length = len(document)
-    #URL will be replaced with ec2 ami instance once that is setup
-    joined_string = (" ").join(document)
-    annotations = spotlight.annotate('http://spotlight.dbpedia.org/rest/annotate', joined_string, confidence=0.4, support=10)
+    doc_joined = " ".join(document)
     positions = [[] for x in xrange(doc_length)]
-    for a in annotations:
-        surfaceForm = a["surfaceForm"]
-        offset = a["offset"]
-        type = a["types"]
-        all_types = type.split(",")
-        dbpedia_type = all_types[0]
-        pos = get_pos(offset, document)
-        words = surfaceForm.split(" ")
-        len_words = len(words)
-        try:
-            if (len_words > 1 and str(dbpedia_type) != ""):
-                c = pos
-                num = 0
-                while c < pos + len_words:
-                    db = str(dbpedia_type)
-                    positions[c] = [db.upper()]
-                    num = num + 1
-                    c = c + 1
-            else:
-                db = str(dbpedia_type)
-                positions[pos] = [db.upper()]
-                #if has type but is empty string set to "thing"
-                if db == "":
-                    positions[pos] = ["DBpedia:Thing".upper()]
-        except AttributeError:
-            positions[pos] = []
+    try:
+        annotations = spotlight.annotate('http://tweedr.dssg.io:2222/rest/annotate', doc_joined, confidence=0.4, support=20)
+        for a in annotations:
+            offset = a["offset"]
+            type = a["types"]
+            all_types = type.split(",")
+            dbpedia_type = all_types[0]
+            pos = get_pos(offset, document)
+            db = str(dbpedia_type)
+            positions[pos] = [db.upper()]
+    except Exception:
+        return positions
     return positions
+
 
 crf_feature_functions = [
     unigrams,
@@ -109,6 +94,7 @@ crf_feature_functions = [
     numeric,
     unique,
     hypernyms,
+    dbpedia_features,
 ]
 
 all_feature_functions = crf_feature_functions + [
@@ -123,13 +109,29 @@ classifier_feature_functions = [
 
 
 def featurize(tokens, feature_functions):
-    '''Take a N-long list of strings (natural text), apply each feature function,
-    and then unzip (transpose) and flatten so that we get a N-long list of
-    arbitrarily-long lists of strings.
-    '''
     feature_functions_results = [feature_function(tokens) for feature_function in feature_functions]
+    list_of_token_features = []
+    #add token features
     for token_featuress in izip(*feature_functions_results):
-        yield chain.from_iterable(token_featuress)
+        list_of_token_features.append(list(chain.from_iterable(token_featuress)))
+    #add features to the left and to the right
+    i = 0
+    while i < len(list_of_token_features):
+        j = list_of_token_features[i]
+        it = [k for k in j]
+        if i > 0:
+            a = list_of_token_features[i - 1]
+            c = ['^^^' + k for k in a]
+            c.pop(0)
+            it += c
+
+        if i < len(list_of_token_features) - 1:
+            b = list_of_token_features[i + 1]
+            d = ['$$$' + k for k in b]
+            d.pop(0)
+            it += d
+        i = i + 1
+        yield chain.from_iterable([it])
 
 
 def main():

@@ -1,5 +1,6 @@
 import sys
 import json
+from tweedr.lib.text import whitespace_unicode_translations
 from tweedr.api.protocols import StringProtocol, DictProtocol, TweetDictProtocol
 
 import logging
@@ -51,14 +52,12 @@ class TweetStandardizer(Mapper):
     INPUT = DictProtocol
     OUTPUT = TweetDictProtocol
 
-    whitespace = {ord('\t'): u' ', ord('\n'): u' ', ord('\r'): u''}
-
     def __call__(self, dict_):
         # ensure text. different sources call it different things.
         if 'text' in dict_:
-            dict_['text'] = dict_['text'].translate(self.whitespace)
+            dict_['text'] = dict_['text'].translate(whitespace_unicode_translations)
         elif 'body' in dict_:
-            dict_['text'] = dict_.pop('body').translate(self.whitespace)
+            dict_['text'] = dict_.pop('body').translate(whitespace_unicode_translations)
         else:
             logger.critical('Could not find text field in %s', dict_)
             raise KeyError("'text' | 'body'")

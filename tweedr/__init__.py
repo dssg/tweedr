@@ -21,7 +21,7 @@ class ColorFormatter(logging.Formatter):
     thresholds = [
         (logging.CRITICAL, (Back.RED, Back.RESET)),
         (logging.ERROR, (Fore.RED, Fore.RESET)),
-        (logging.WARNING, (Back.YELLOW, Back.RESET)),
+        (logging.WARNING, (Back.YELLOW + Fore.BLACK, Back.RESET + Fore.RESET)),
         (logging.INFO, (Fore.CYAN, Fore.RESET)),
         (logging.DEBUG, (Fore.GREEN, Fore.RESET)),
         (SILLY, (Style.DIM, Style.NORMAL)),

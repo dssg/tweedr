@@ -10,6 +10,8 @@ punctuation_translations = dict(
     [(ord(char), None) for char in punctuation_deletions] +
     [(ord(char), u' ') for char in punctuation_elisions])
 
+whitespace_unicode_translations = {ord('\t'): u' ', ord('\n'): u' ', ord('\r'): u''}
+
 
 def UpperCamelCase(name):
     return re.sub('(^|-|_)(.)', lambda g: g.group(2).upper(), name)

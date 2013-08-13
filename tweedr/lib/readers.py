@@ -1,4 +1,5 @@
 import csv
+from StringIO import StringIO
 
 
 def infer(s):
@@ -15,6 +16,20 @@ def read_simple_csv(path):
         for line in csv_fp:
             rows.append([infer(cell) for cell in line.strip().split(',')])
     return rows
+
+
+def read_until(readable, marks):
+    '''Could stall if mark never happens before the EOF'''
+    stdout_buffer = StringIO()
+    while True:
+        # read in bytes one-by-one because we have to break as soon as we hit
+        #   any `mark` character
+        byte = readable.read(1)
+        if byte in marks:
+            output = stdout_buffer.getvalue()
+            stdout_buffer.close()
+            return output
+        stdout_buffer.write(byte)
 
 
 class SniffingDictReader(csv.DictReader, object):

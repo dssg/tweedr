@@ -59,6 +59,7 @@ def main():
         similar.TextCounter(),
         similar.FuzzyTextCounter(),
         nlp.POSTagger(),
+        nlp.SequenceTagger(),
         mappers.LineStream(sys.stdout),
     )
 

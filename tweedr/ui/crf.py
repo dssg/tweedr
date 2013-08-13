@@ -22,22 +22,8 @@ bottle.TEMPLATE_PATH.append(os.path.join(tweedr.root, 'templates'))
 app = bottle.Bottle()
 
 # globals are messy, but we don't to retrain a tagger for every request
-GLOBALS = dict()
-crf_model_filepath = '/tmp/tweedr.ui.crf.model'
-
-
-def initialize():
-    logger.debug('initializing %s', __name__)
-    if os.path.exists(crf_model_filepath):
-        GLOBALS['tagger'] = CRF.from_file(crf_model_filepath)
-    else:
-        query = DBSession.query(TokenizedLabel).limit(10000)
-        crf = CRF.from_data(query)
-        crf.save(crf_model_filepath)
-        GLOBALS['tagger'] = crf
-
-
-initialize()
+logger.debug('initializing %s (training or loading CRF using defaults)', __name__)
+GLOBALS = dict(tagger=CRF.default())
 
 
 @app.get('/')
@@ -48,6 +34,7 @@ def root():
 @app.get('/crf')
 @view('crf.mako')
 def index():
+    # effectively static; all the fun stuff happens in the template
     return dict()
 
 
@@ -85,8 +72,7 @@ def tagger_tag():
 
 @app.route('/tagger/retrain')
 def tagger_retrain():
-    os.remove(crf_model_filepath)
-    initialize()
+    GLOBALS['tagger'] = CRF.default(retrain=True)
     return dict(success=True)
 
 

@@ -42,6 +42,7 @@ class CRF(ClassifierI):
     def predict(self, X):
         y = []
         for features_iter in X:
+            # maybe use predict_one instead?
             items = ItemSequence(features_iter)
             # just die if self.tagger has not been set
             self.tagger.set(items)
@@ -56,6 +57,11 @@ class CRF(ClassifierI):
             self.trainer.set(name, value)
 
     # additional fields below are not required by ClassifierI
+    def predict_one(self, features_iter):
+        items = ItemSequence(features_iter)
+        self.tagger.set(items)
+        return list(self.tagger.viterbi())
+
     def save(self, model_filepath):
         logger.debug('Saving model to %s', model_filepath)
         # just die if self.model_filepath doesn't exist
@@ -92,3 +98,17 @@ class CRF(ClassifierI):
         crf.fit(X, y)
 
         return crf
+
+    @classmethod
+    def default(cls, retrain=False, limit=10000):
+        # Is it messy to have this method here, since it depends on tweedr.models.*?
+        # and on a specific filepath in the local filesystem?
+        model_filepath = '/tmp/tweedr.ml.crf.classifier-max%d.model' % limit
+        if os.path.exists(model_filepath):
+            return cls.from_file(model_filepath)
+        else:
+            from tweedr.models import DBSession, TokenizedLabel
+            query = DBSession.query(TokenizedLabel).limit(10000)
+            crf = cls.from_data(query)
+            crf.save(model_filepath)
+            return crf

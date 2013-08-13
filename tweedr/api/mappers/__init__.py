@@ -49,6 +49,21 @@ class IgnoreMetadata(Mapper):
 
 
 class TweetStandardizer(Mapper):
+    '''Ensures that a given dict being mapped through the pipeline has basic
+    fields that come with every tweet, coalescing them into predictable names.
+
+    This is necessary because different sources of tweets (e.g., raw Twitter,
+    GNIP) name this information a variety of different things.
+
+    The fields are:
+
+        * `text` Unicode The tweet's textual content
+        * `author` Unicode The Twitter screen name of the tweet's author
+        * `id_str` Unicode The tweet's identifying snowflake, as assigned by
+            Twitter when originally posted.
+
+    See `TweetDictProtocol`'s documentation for more details.
+    '''
     INPUT = DictProtocol
     OUTPUT = TweetDictProtocol
 

@@ -145,6 +145,14 @@ Portions of this codebase expect a few environment variables or config files:
       "region": "us-west-2"
     }
 
+How to install crfsuite
+
+    Install in this order:
+    - libLBFGS: http://www.chokkan.org/software/liblbfgs/
+    - crfsuite: http://www.chokkan.org/software/crfsuite/
+    - crfsuite python wrapper: https://github.com/chokkan/crfsuite/tree/master/swig/python
+    - If you are running on OS X, add a -lpython switch to get the python wrapper to install properly
+
 `~/.boto`, for boto:
 
     [Credentials]

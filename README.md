@@ -145,7 +145,7 @@ Portions of this codebase expect a few environment variables or config files:
       "region": "us-west-2"
     }
 
-How to install crfsuite
+Installing crfsuite:
 
     Install in this order:
     - libLBFGS: http://www.chokkan.org/software/liblbfgs/

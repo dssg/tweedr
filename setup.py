@@ -75,8 +75,9 @@ setup(
         'install_data': install_data,
     },
     tests_require=[
+        'nose',
         'pep8',
         'pyflakes',
     ],
-    test_suite='tests',
+    test_suite='nose.collector',
 )

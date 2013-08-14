@@ -61,6 +61,7 @@ setup(
         'pybloomfiltermmap',
         'python-hashes',
         'scikit-learn',
+        'scipy',
         'sqlalchemy',
         'ujson',
     ],

@@ -1,37 +1,13 @@
 ## Tests
 
-Most tests use Python's built-in `unittest` test framework.
+Tweedr uses [nose](http://nose.readthedocs.org/) as the test runner.
 
-The `unittest`-powered modules are run by setuptools. At the command line, go to this project's base directory, and run:
+Tests can be disabled on Travis CI by putting "no_ci" into the test name.
 
-    python setup.py test
+There are three ways to run tests, all of which must be called from the package root directory.
 
-Alternatively, adding the following snippet to any `tests/*.py` file will let you execute its tests at the command line.
+1. `nosetests`
+2. `python setup.py test`
+3. `python setup.py nosetests`
 
-```python
-if __name__ == '__main__':
-    unittest.main()
-```
-
-## `unittest` cheat sheet
-
-From the [documentation](http://docs.python.org/2/library/unittest.html):
-
-> The TestCase class provides a number of methods to check for and report failures, such as:
-
-| Method | Checks that |
-|:-------|:------------|
-| assertEqual(a, b) | a == b |
-| assertNotEqual(a, b) | a != b |
-| assertTrue(x) | bool(x) is True |
-| assertFalse(x) | bool(x) is False |
-| assertIs(a, b) | a is b |
-| assertIsNot(a, b) | a is not b |
-| assertIsNone(x) | x is None |
-| assertIsNotNone(x) | x is not None |
-| assertIn(a, b) | a in b |
-| assertNotIn(a, b) | a not in b |
-| assertIsInstance(a, b) | isinstance(a, b) |
-| assertNotIsInstance(a, b) | not isinstance(a, b) |
-
-Each of these methods accepts a final keyword argument, `msg`, which is a string that will be printed if the test does not pass.
+Travis CI uses the last of these because it's the only one that automatically installs packages from `tests_require` in setup.py as well as allows setting command line options (it uses `-e no_ci` to exclude tests with "no_ci" in their name).

@@ -50,12 +50,8 @@ def test_mysql_credentials_no_ci():
     names = ['MYSQL_PASS', 'MYSQL_HOST']
     values = [os.environ[name] for name in names]
 
-    for base, directories, filenames in os.walk(tweedr.root):
-        for filename in filenames:
-            filepath = os.path.join(base, filename)
-            with open(filepath) as fp:
-                contents = fp.read()
-                for value in values:
-                    # assertNotIn(first, second, msg=None)
-                    #   Test that first is (or is not) in second.
-                    assert value not in contents, 'Found a blacklisted credential (%s) in %s' % (value, filepath)
+    for filepath in walk(tweedr.root):
+        with open(filepath) as fp:
+            contents = fp.read()
+            for value in values:
+                assert value not in contents, 'Found a blacklisted credential (%s) in %s' % (value, filepath)

@@ -50,6 +50,10 @@ def numeric(document):
     return [['NUMERIC'] if token.isdigit() else [] for token in document]
 
 
+def includes_numeric(document):
+    return[['INCLUDES_NUMERIC'] if contains_digits(token) else [] for token in document]
+
+
 def unique(document):
     seen = {}
     features = []
@@ -64,6 +68,14 @@ def get_pos(offset, document):
     beginning = doc_joined[:offset]
     length = len(beginning.split(" ")) - 1
     return length
+
+
+def contains_digits(string):
+    for char in list(string):
+        if char.isdigit():
+            return True
+            break
+    return False
 
 
 def dbpedia_features(document):
@@ -145,7 +157,7 @@ def main():
         # apply all feature functions
         tokens_features = featurize(tokens, all_feature_functions)
         for i, token_features in enumerate(tokens_features):
-            print i, token_features
+            print i, list(token_features)
 
 if __name__ == '__main__':
     main()

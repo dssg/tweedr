@@ -48,12 +48,12 @@ def iglob(pattern, root='.'):
             yield filepath
 
 
-def walk(top, pred=None):
-    # if pred is not None, pred(filepath) must be True for each filepath to be returned
+def walk(top, *predicates):
+    # predicate(filepath) must be True for each predicate, for each filepath to be returned
     for dirpath, dirnames, filenames in os.walk(top):
         filepaths = [os.path.join(dirpath, filename) for filename in filenames]
         for filepath in filepaths:
-            if pred is None or pred(filepath):
+            if all(predicate(filepath) for predicate in predicates):
                 yield filepath
 
 

@@ -60,6 +60,7 @@ setup(
         'pattern',
         'pybloomfiltermmap',
         'python-hashes',
+        'requests',
         'scikit-learn',
         'scipy',
         'sqlalchemy',

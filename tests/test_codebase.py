@@ -1,9 +1,29 @@
 import os
 import sys
-
-
 import tweedr
 from tweedr.lib import walk
+
+source_endings = ('.py', '.bars', '.js', '.md', '.txt', '.mako', '.yml', '.less', '.json', '.css')
+
+
+def not_egg(filepath):
+    return '.egg' not in filepath
+
+
+def not_git(filepath):
+    return '/.git/' not in filepath
+
+
+def not_static(filepath):
+    return '/static/lib/' not in filepath
+
+
+def is_source(filepath):
+    return filepath.endswith(source_endings)
+
+
+def is_python(filepath):
+    return filepath.endswith('.py')
 
 
 def test_pep8():
@@ -13,8 +33,10 @@ def test_pep8():
         'E128',  # E128 continuation line under-indented for visual indent
         'E501',  # E501 line too long (?? > 79 characters)
     ]
-    pep8style = pep8.StyleGuide(paths=[tweedr.root], ignore=ignore)
-    total_errors = pep8style.check_files().total_errors
+    total_errors = 0
+    pep8style = pep8.StyleGuide(ignore=ignore)
+    for filepath in walk(tweedr.root, not_egg, not_git, is_python):
+        total_errors += pep8style.check_files([filepath]).total_errors
 
     assert total_errors == 0, 'Codebase does not pass PEP-8 (%d errors)' % total_errors
 
@@ -23,8 +45,7 @@ def test_pyflakes():
     '''Running pyflakes checks recursively in %s''' % tweedr.root
     from pyflakes import api as pyflakes
     total_errors = 0
-    py_check = lambda s: '.egg' not in s and '/.git/' not in s and s.endswith('.py')
-    for filepath in walk(tweedr.root, py_check):
+    for filepath in walk(tweedr.root, not_egg, not_git, is_python):
         total_errors += pyflakes.checkPath(filepath)
 
     assert total_errors == 0, 'Codebase does not pass pyflakes (%d errors)' % total_errors
@@ -33,9 +54,7 @@ def test_pyflakes():
 def test_trailing_whitespace():
     '''Running trailing whitespace checks recursively in %s''' % tweedr.root
     total_errors = 0
-    source_endings = ('.py', '.bars', '.js', '.md', '.txt', '.mako', '.yml', '.less', '.json', '.css')
-    source_check = lambda s: '/static/lib/' not in s and '/.git/' not in s and s.endswith(source_endings)
-    for filepath in walk(tweedr.root, source_check):
+    for filepath in walk(tweedr.root, not_egg, not_git, not_static, is_source):
         with open(filepath) as fp:
             for line_i, raw in enumerate(fp):
                 line = raw.rstrip('\n')

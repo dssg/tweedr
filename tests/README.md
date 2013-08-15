@@ -4,7 +4,7 @@ Tweedr uses [nose](http://nose.readthedocs.org/) as the test runner.
 
 Tests can be disabled on Travis CI by putting "no_ci" into the test name.
 
-There are three ways to run tests, all of which must be called from the package root directory.
+There are three ways to run tests (assuming you have `nose` installed), all of which must be called from the package root directory.
 
 1. `nosetests`
 2. `python setup.py test`

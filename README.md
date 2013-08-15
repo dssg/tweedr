@@ -163,31 +163,31 @@ Installing dependent libraries:
     - [sudo] python setup.py install
 
     Install bottle:
-   	   pip install bottle
+    pip install bottle
 
     Install colorama: 
-	   pip install colorama
+    pip install colorama
 
     Install Mako:
-           pip install Mako
+    pip install Mako
 
     Install mrjob: 
-   	   pip install mrjob
+    pip install mrjob
 
     Install mysql-python:
-   	   pip install MySQL-python
+    pip install MySQL-python
    
     Install pattern:
-   	   pip install pattern 
+    pip install pattern 
    
     Install pybloomfiltermmap:
-   	   pip install pybloomfiltermmap
+    pip install pybloomfiltermmap
 
     Install python-hashes:
-   	   pip install python-hashes
+    pip install python-hashes
 
     Install scikit-learn:
-   	   pip install -U scikit-learn
+    pip install -U scikit-learn
 
     Install scipy:
     - Ubuntu and Debian: sudo apt-get install python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
@@ -196,10 +196,10 @@ Installing dependent libraries:
     - Macports: sudo port install py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose
 
     Install sqlalchemy:
-    	    pip install SQLAlchemy
+    pip install SQLAlchemy
 
     Install ujson: 
-    	    pip install ujson
+    pip install ujson
  
 
 `~/.boto`, for boto:

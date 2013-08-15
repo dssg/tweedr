@@ -162,34 +162,34 @@ Installing dependent libraries:
 	    cd pip-X.X
 	    [sudo] python setup.py install
 
-   Install bottle:
+    Install bottle:
    	   pip install bottle
 
-   Install colorama: 
+    Install colorama: 
 	   pip install colorama
 
-   Install Mako:
+    Install Mako:
            pip install Mako
 
-   Install mrjob: 
+    Install mrjob: 
    	   pip install mrjob
 
-   Install mysql-python:
+    Install mysql-python:
    	   pip install MySQL-python
    
-   Install pattern:
+    Install pattern:
    	   pip install pattern 
    
-   Install pybloomfiltermmap:
+    Install pybloomfiltermmap:
    	   pip install pybloomfiltermmap
 
-   Install python-hashes:
+    Install python-hashes:
    	   pip install python-hashes
 
-   Install scikit-learn:
+    Install scikit-learn:
    	   pip install -U scikit-learn
 
-   Install scipy:
+    Install scipy:
    	   Ubuntu and Debian: sudo apt-get install python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
 
 	   Fedora: sudo yum install numpy scipy python-matplotlib ipython python-pandas sympy python-nose

@@ -25,6 +25,14 @@ def singular(name):
     return re.sub('s$', '', name)
 
 
+def zip_boundaries(xs, space_len=1):
+    start = 0
+    for x in xs:
+        x_len = len(x)
+        yield x, start, start + x_len
+        start += x_len + space_len
+
+
 def gloss(alignments, prefixes=None, postfixes=None, width=None, toksep=' ', linesep='\n', groupsep='\n'):
     '''
     Creates an interlinear gloss.

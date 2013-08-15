@@ -1,10 +1,13 @@
 # each feature function takes an N-long document (list of strings) and returns an N-long list
 #   of lists/tuples of features (i.e., strings) to add to the total data for that sentence.
 #   often the list will contain lists that are 1-long
-import lexicon_list
-import spotlight
-from tweedr.ml.wordnet import hypernyms
+import os
+import requests
+from tweedr.ml import spotlight, wordnet, lexicon_list
+from tweedr.lib.text import zip_boundaries
 from itertools import izip, chain
+
+spotlight_annotate_url = '%s/rest/annotate' % os.environ.get('SPOTLIGHT', 'http://spotlight.sztaki.hu:2222')
 
 
 def spacer(xs):
@@ -63,6 +66,15 @@ def unique(document):
     return features
 
 
+def hypernyms(document, recursive=True, depth=1):
+    '''Iterate through all senses for all 1-away hypernyms. E.g.:
+
+        print map(list, hypernyms(document))
+    '''
+    for token in document:
+        yield wordnet.token_hypernyms(token, recursive, depth)
+
+
 def get_pos(offset, document):
     doc_joined = " ".join(document)
     beginning = doc_joined[:offset]
@@ -95,6 +107,25 @@ def dbpedia_features(document):
     except Exception:
         return positions
     return positions
+
+
+def dbpedia_spotlight(document, confidence=0.1, support=10):
+    document_string = u' '.join(document).encode('utf8')
+    r = requests.post(spotlight_annotate_url,
+        headers=dict(Accept='application/json'),
+        data=dict(text=document_string, confidence=confidence, support=support))
+    Resources = r.json()['Resources']
+    for token, token_start, token_end in zip_boundaries(document):
+        labels = []
+        for Resource in Resources:
+            entity_start = int(Resource['@offset'])
+            entity_end = entity_start + len(Resource['@surfaceForm'])
+
+            if entity_start <= token_start <= entity_end or entity_start <= token_end <= entity_end:
+                entity_uri = Resource['@URI']
+                entity_types = str(Resource['@types']).split(',')
+                labels += [entity_uri] + entity_types
+        yield labels
 
 
 crf_feature_functions = [

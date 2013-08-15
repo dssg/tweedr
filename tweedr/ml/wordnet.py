@@ -26,12 +26,3 @@ def token_hypernyms(token, recursive, depth):
         for hypernym in synset.hypernyms(recursive, depth):
             for sense in hypernym.senses:
                 yield sense
-
-
-def hypernyms(document, recursive=True, depth=1):
-    '''Iterate through all senses for all 1-away hypernyms. E.g.:
-
-        print map(list, hypernyms(document))
-    '''
-    for token in document:
-        yield token_hypernyms(token, recursive, depth)

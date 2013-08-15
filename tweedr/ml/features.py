@@ -120,7 +120,7 @@ classifier_feature_functions = [
 ]
 
 
-def featurize(tokens, feature_functions):
+def featurize_and_then_some(tokens, feature_functions):
     feature_functions_results = [feature_function(tokens) for feature_function in feature_functions]
     list_of_token_features = []
     #add token features
@@ -144,6 +144,16 @@ def featurize(tokens, feature_functions):
             it += d
         i = i + 1
         yield chain.from_iterable([it])
+
+
+def featurize(tokens, feature_functions):
+    '''Take a N-long list of strings (natural text), apply each feature function,
+    and then unzip (transpose) and flatten so that we get a N-long list of
+    arbitrarily-long lists of strings.
+    '''
+    feature_functions_results = [feature_function(tokens) for feature_function in feature_functions]
+    for token_featuress in izip(*feature_functions_results):
+        yield chain.from_iterable(token_featuress)
 
 
 def main():

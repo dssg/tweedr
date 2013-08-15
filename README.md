@@ -157,10 +157,10 @@ Installing dependent libraries:
     While the command 'python setup.py install_data' should install all of the external resources required to run this module, we have provided directions on installing external resources (just in case). For many of these resources 'pip install' is strongly suggested. Directions for installing pip are below:
       	     
     Install pip:
-    	    curl -O https://pypi.python.org/packages/source/p/pip/pip-X.X.tar.gz
-	    tar xvfz pip-X.X.tar.gz
-	    cd pip-X.X
-	    [sudo] python setup.py install
+    - curl -O https://pypi.python.org/packages/source/p/pip/pip-X.X.tar.gz
+    - tar xvfz pip-X.X.tar.gz
+    - cd pip-X.X
+    - [sudo] python setup.py install
 
     Install bottle:
    	   pip install bottle
@@ -190,12 +190,10 @@ Installing dependent libraries:
    	   pip install -U scikit-learn
 
     Install scipy:
-   	   Ubuntu and Debian: sudo apt-get install python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
-
-	   Fedora: sudo yum install numpy scipy python-matplotlib ipython python-pandas sympy python-nose
-                   Users of Fedora 17 and earlier should then upgrade IPython using pip: sudo pip install --upgrade ipython
-
-           Macports: sudo port install py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose
+    - Ubuntu and Debian: sudo apt-get install python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
+    - Fedora: sudo yum install numpy scipy python-matplotlib ipython python-pandas sympy python-nose
+    - Users of Fedora 17 and earlier should then upgrade IPython using pip: sudo pip install --upgrade ipython
+    - Macports: sudo port install py27-numpy py27-scipy py27-matplotlib py27-ipython +notebook py27-pandas py27-sympy py27-nose
 
     Install sqlalchemy:
     	    pip install SQLAlchemy

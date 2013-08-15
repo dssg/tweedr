@@ -1,0 +1,135 @@
+\documentclass{article}
+
+\usepackage{fullpage}
+\usepackage{multicol}
+\usepackage{outline}
+
+\twocolumn
+
+
+\title{Tweedr: Twitter for Disaster Response}
+\author{Zahra Ashktorab \and Chris Brown \and Jit Nandi \and Aron Culotta}
+
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+\begin{outline}
+  \item Context
+  \item Problem
+  \item Solution Overview
+\end{outline}
+
+
+
+\section{Data}
+\begin{outline}
+  \item Unlabeled data from different disasters
+  \item Labeling for classification (and uniform vs keyword sampling)
+  \item Labeling for extraction
+  \item Summary statistics (number labeled/unlabeled; number of each class; number by disaster)
+\end{outline}
+
+
+
+\section{Methods}
+\begin{outline}
+  \item Classification
+  \item Clustering
+  \item Extraction
+\end{outline}
+
+
+
+
+\section{Experiments}
+\begin{outline}
+  \item Classification results
+    \begin{outline}
+      \item overall precision, recall, f1
+      \item compared with predicting on unseen disasters
+      \item comparison of sLDA and vanilla classifiers
+      \item visualize important features (e.g., sLDA graph)
+      \item list some exemplary good/bad classifications
+    \end{outline}
+  \item Clustering results (maybe don't need accuracy, but at least what percent is duplicate)
+  \item Extraction
+    \begin{outline}
+      \item overall precision, recall, f1, confusion matrix
+      \item compared with predicting on unseen disasters
+      \item visualize important features
+      \item list some exemplary good/bad classifications
+    \end{outline}
+\end{outline}
+
+\begin{table*}[t]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+              & \multicolumn{3}{c|}{All} &                       \multicolumn{3}{c|}{New Disaster}  \\
+\hline
+{\bf Method}  &  {\bf F1}        &  {\bf Pr}  &  {\bf Re} & {\bf F1}  &  {\bf Pre}  &  {\bf Re}\\
+\hline
+{\bf sLDA}    &  0.01 $\pm$ 0.10 & 0.01 $\pm$ 0.10 & 0.01 $\pm$ 0.10 & 0.01 $\pm$ 0.10 & 0.01 $\pm$ 0.10 & 0.01 $\pm$ 0.10\\
+{\bf SVM}     &       F1         &       Pr        &       Re        &      F1         &       Pre       &       Re \\
+{\bf LogReg}  &       F1         &       Pr        &       Re        &      F1         &       Pre       &       Re \\
+\hline
+\end{tabular}
+\caption{Classification results\label{tab.classification_results}}
+\end{table*}
+
+
+
+\begin{table*}[t]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+               & \multicolumn{3}{c|}{All} &                       \multicolumn{3}{c|}{New Disaster}  \\
+\hline
+{\bf Features} &  {\bf F1}        &  {\bf Pr}  &  {\bf Re} & {\bf F1}  &  {\bf Pre}  &  {\bf Re}\\
+\hline
+{\bf All}      &  0.01 $\pm$ 0.10 & 0.01 $\pm$ 0.10 & 0.01 $\pm$ 0.10 & 0.01 $\pm$ 0.10 & 0.01 $\pm$ 0.10 & 0.01 $\pm$ 0.10\\
+{\bf feature1} &       F1         &       Pr        &       Re        &      F1         &       Pre       &       Re \\
+{\bf feature2} &       F1         &       Pr        &       Re        &      F1         &       Pre       &       Re \\
+\hline
+\end{tabular}
+\caption{Extraction results\label{tab.extraction_results}}
+\end{table*}
+
+
+\begin{table}[t]
+\centering
+\begin{tabular}{|l|}
+\hline
+{\bf Correctly identified as damage or casualty}\\
+\hline
+xxxx\\
+\hline
+{\bf Incorrectly identified as damage or casualty}\\
+\hline
+xxxx\\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Related Work}
+\begin{itemize}
+\item Extracting Information Nuggets from Disaster- Related Messages in Social Media
+\item Practical Extraction of Disaster-Relevant Information from Social Media
+\item Social Media Data Mining: A Social Network Analysis Of Tweets During The 2010-2011 Australian Floods
+\item TweetTracker: An Analysis Tool for Humanitarian and Disaster Relief
+\item Natural Language Processing to the Rescue?: Extracting “Situational Awareness” Tweets During Mass Emergency
+\end{itemize}
+
+
+
+\section{Conclusions and Future Work}
+\begin{outline}
+  \item Summarize what we did
+  \item Mention limitations
+  \item Summarize next steps
+\end{outline}
+
+\end{document}

@@ -7,6 +7,8 @@ Tweedr makes information from social media more accessible to providers of disas
 
 Tweedr is a [Data Science for Social Good](http://dssg.io/) project, through a partnership with the [Qatar Computational Research Institute](http://qcri.qa/).
 
+See the [Project Overview](https://github.com/dssg/tweedr/wiki) for a more extensive discussion of the problem and proposed solution.
+
 
 ## Project layout
 

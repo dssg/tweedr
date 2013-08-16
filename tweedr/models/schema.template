@@ -37,8 +37,11 @@ class BaseMixin(object):
         pairs = [u'%s=%s' % (k, v) for k, v in self.__json__().items()]
         return u'<{type_name} {pairs}>'.format(type_name=type_name, pairs=u' '.join(pairs))
 
-    def __repr__(self):
+    def __str__(self):
         return unicode(self).encode('utf-8')
+
+    def __repr__(self):
+        return str(self)
 
 Base = declarative_base(metadata=metadata, cls=BaseMixin)
 % for table in metadata.sorted_tables:

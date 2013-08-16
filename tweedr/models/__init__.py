@@ -44,6 +44,11 @@ class DamageClassification(DamageClassification):
 
 
 class TokenizedLabel(TokenizedLabel):
+    # the FK is called token_type, even though it is an identifying key and not
+    # an actual token type, so we name the target object "token_type_object"
+    token_type_object = orm.relationship(Label, lazy='subquery',
+        primaryjoin=orm.foreign(TokenizedLabel.token_type) == Label.id)
+
     @property
     def tokens(self):
         return token_re.findall(unicode(self.tweet).encode('utf8'))

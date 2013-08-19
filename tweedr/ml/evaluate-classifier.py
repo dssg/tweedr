@@ -28,7 +28,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import MultinomialNB
 
 from tweedr.models import DamageClassification, DBSession
-
+#from tweedr.ml.pyslda import PySLDA
 
 logger = logging.getLogger('eval-clf')
 

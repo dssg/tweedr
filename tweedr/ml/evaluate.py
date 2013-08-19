@@ -10,7 +10,7 @@ from tweedr.lib.text import gloss
 from tweedr.models import DBSession, TokenizedLabel
 from tweedr.ml import compare_labels  # print_metrics_summary
 from tweedr.ml.crf.classifier import CRF
-from tweedr.ml.features import crf_feature_functions, featurize
+from tweedr.ml.features import crf_feature_functions, featurize, featurize_adjacent
 
 import logging
 logger = logging.getLogger(__name__)

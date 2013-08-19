@@ -1,4 +1,4 @@
-# Tweedr is Twitter for Disaster Response
+# Tweedr: Twitter for Disaster Response
 
 Tweedr makes information from social media more accessible to providers of disaster relief. There are two aspects to the application:
 
@@ -7,7 +7,7 @@ Tweedr makes information from social media more accessible to providers of disas
 
 Tweedr is a [Data Science for Social Good](http://dssg.io/) project, through a partnership with the [Qatar Computational Research Institute](http://qcri.qa/).
 
-See the [Project Overview](https://github.com/dssg/tweedr/wiki) for a more extensive discussion of the problem and proposed solution or check out our [tutorial website](http://tokens.qcri.dssg.io/tweedrtutorial/). 
+See the [Project Overview](https://github.com/dssg/tweedr/wiki) for a more extensive discussion of the problem and proposed solution or check out our [tutorial website](http://tokens.qcri.dssg.io/tweedrtutorial/).
 
 
 ## Project layout
@@ -31,6 +31,11 @@ See the [Project Overview](https://github.com/dssg/tweedr/wiki) for a more exten
 See [Deploy](https://github.com/dssg/tweedr/wiki/Deploy) on the [wiki](https://github.com/dssg/tweedr/wiki) for more help getting an instance of Tweedr up and running.
 
 If you want to jump straight to development, see the [Contributing](https://github.com/dssg/tweedr/wiki/Contributing) wiki page.
+
+
+## Contact
+
+Want to get in touch? Found a bug? Open up a [new issue](https://github.com/dssg/tweedr/issues/new) or email us at [dssg-qcri@googlegroups.com](mailto:dssg-qcri@googlegroups.com).
 
 
 ## License

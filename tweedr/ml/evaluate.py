@@ -80,7 +80,7 @@ def main():
         filter(TokenizedLabel.tweet is not None).\
         filter(TokenizedLabel.tweet != '').\
         limit(opts.max_data)
-    if (opts.adjacant == 0):
+    if (opts.adjacent == 0):
         X_y = ((featurize(item.tokens, crf_feature_functions), item.labels) for item in query)
     else:
         X_y = ((featurize_adjacent(item.tokens, crf_feature_functions), item.labels) for item in query)

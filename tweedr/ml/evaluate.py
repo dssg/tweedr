@@ -67,6 +67,8 @@ def main():
         type=int, default=10, help='How many folds of the data to test on')
     parser.add_argument('--max-data',
         type=int, default=10000, help='Maximum data points to train and test on')
+    parser.add_argument('--adjacent',
+        type=int, default=0, help='Set adjacent to 1 if adjacent functions want to be used')
     opts = parser.parse_args()
 
     # e.g., tokenized_label =
@@ -78,7 +80,10 @@ def main():
         filter(TokenizedLabel.tweet is not None).\
         filter(TokenizedLabel.tweet != '').\
         limit(opts.max_data)
-    X_y = ((featurize(item.tokens, crf_feature_functions), item.labels) for item in query)
+    if (opts.adjacant == 0):
+        X_y = ((featurize(item.tokens, crf_feature_functions), item.labels) for item in query)
+    else:
+        X_y = ((featurize_adjacent(item.tokens, crf_feature_functions), item.labels) for item in query)
     # unzip and flatten into static list
     X, y = zip(*X_y)
     # we need to read X multiple times, so make sure it's all static

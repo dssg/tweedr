@@ -58,7 +58,7 @@ setup(
         'mrjob',
         'mysql-python',
         'pattern',
-        'pybloomfiltermmap',
+        'pybloomfiltermmap>=0.3.11',
         'python-hashes',
         'requests',
         'scikit-learn',

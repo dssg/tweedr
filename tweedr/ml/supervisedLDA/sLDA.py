@@ -15,15 +15,18 @@ def runSLDA(tweets, labels):
               for tweet in tweets]
     tweets = map(lambda x: str(x).translate(None, '"'), tweets)
     (tweets_filters, labels_filters) = ([], [])
+    myFile = open('dumpTweets.csv', 'wb')
     for (i, tweet) in enumerate(tweets):
         if len(tweet) > 1:
             tweets_filters.append(tweet)
             labels_filters.append(labels[i])
+            myFile.write('"%s"\t%d\n' % (tweet, labels[i]))
 
-    runTraining(tweets_filters, labels_filters)
+    cutoff = int(round(0.8*len(tweets_filters)))
+    runTraining(tweets_filters[:cutoff], labels_filters[:cutoff])
     print 'Done Training'
-    predictions = runStreaming(tweets_filters)
-    return (predictions, labels_filters)
+    predictions = runStreaming(tweets_filters[cutoff:])
+    return (predictions, labels_filters[cutoff:])
 
 
 def outputJSON(tweets, predictions):

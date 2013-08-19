@@ -151,7 +151,7 @@ classifier_feature_functions = [
 ]
 
 
-def featurize_and_then_some(tokens, feature_functions):
+def featurize_adjacent(tokens, feature_functions):
     feature_functions_results = [feature_function(tokens) for feature_function in feature_functions]
     list_of_token_features = []
     #add token features
@@ -165,13 +165,19 @@ def featurize_and_then_some(tokens, feature_functions):
         if i > 0:
             a = list_of_token_features[i - 1]
             c = ['^^^' + k for k in a]
-            c.pop(0)
+            try:
+                c.pop(0)
+            except IndexError:
+                pass
             it += c
 
         if i < len(list_of_token_features) - 1:
             b = list_of_token_features[i + 1]
             d = ['$$$' + k for k in b]
-            d.pop(0)
+            try:
+                d.pop(0)
+            except IndexError:
+                pass
             it += d
         i = i + 1
         yield chain.from_iterable([it])

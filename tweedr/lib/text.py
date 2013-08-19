@@ -25,6 +25,12 @@ def singular(name):
     return re.sub('s$', '', name)
 
 
+def utf8str(s):
+    if isinstance(s, unicode):
+        return s.encode('utf8')
+    return s
+
+
 def zip_boundaries(xs, space_len=1):
     start = 0
     for x in xs:

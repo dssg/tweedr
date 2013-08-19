@@ -43,8 +43,8 @@ class CRF(ClassifierI):
         y = []
         for features_iter in X:
             # maybe use predict_one instead?
-            items = ItemSequence(features_iter)
-            # just die if self.tagger has not been set
+            items = ItemSequence(features_iter, check=True)
+            # this will just die if self.tagger has not been set
             self.tagger.set(items)
             # could also run self.probability() and self.marginal()
             # convert tuple (output of viterbi()) to list

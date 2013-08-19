@@ -110,11 +110,11 @@ def dbpedia_features(document):
 
 
 def dbpedia_spotlight(document, confidence=0.1, support=10):
-    document_string = u' '.join(document).encode('utf8')
+    document_string = u' '.join(document)
     r = requests.post(spotlight_annotate_url,
         headers=dict(Accept='application/json'),
         data=dict(text=document_string, confidence=confidence, support=support))
-    Resources = r.json()['Resources']
+    Resources = r.json().get('Resources', [])
     for token, token_start, token_end in zip_boundaries(document):
         labels = []
         for Resource in Resources:
@@ -123,7 +123,7 @@ def dbpedia_spotlight(document, confidence=0.1, support=10):
 
             if entity_start <= token_start <= entity_end or entity_start <= token_end <= entity_end:
                 entity_uri = Resource['@URI']
-                entity_types = str(Resource['@types']).split(',')
+                entity_types = Resource['@types'].split(',')
                 labels += [entity_uri] + entity_types
         yield labels
 

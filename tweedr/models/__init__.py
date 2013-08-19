@@ -54,7 +54,7 @@ class TokenizedLabel(TokenizedLabel):
         return token_re.findall(unicode(self.tweet).encode('utf8'))
 
     @property
-    def labels(self):
+    def labels(self, null_label=None):
         labels = []
         label_start, label_end = self.token_start, self.token_end
         for match in token_re.finditer(self.tweet):
@@ -62,9 +62,8 @@ class TokenizedLabel(TokenizedLabel):
             # token = match.group(0)
             # we want to determine if this particular token in the original tweet overlaps
             #   with any portion of the selected label (label_span)
+            label = null_label
             if label_start <= token_start <= label_end or label_start <= token_end <= label_end:
-                labels.append(self.token_type)
-            else:
-                # should I let the user set the NA label?
-                labels.append(None)
+                label = self.token_type_object.text
+            labels.append(label)
         return [unicode(label).encode('utf8') for label in labels]

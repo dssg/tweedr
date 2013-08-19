@@ -59,7 +59,7 @@ def test_trailing_whitespace():
             for line_i, raw in enumerate(fp):
                 line = raw.rstrip('\n')
                 if line.endswith((' ', '\t')):
-                    print >> sys.stderr, '%s:%d: trailing whitespace' % (filepath, line_i + 1)
+                    print >> sys.stdout, '%s:%d: trailing whitespace' % (filepath, line_i + 1)
                     total_errors += 1
 
     assert total_errors == 0, 'Codebase has trailing whitespace (%d errors)' % total_errors

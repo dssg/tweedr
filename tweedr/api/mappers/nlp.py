@@ -1,6 +1,5 @@
 from tweedr.api.mappers import Mapper
 from tweedr.api.protocols import TweetDictProtocol
-from tweedr.lib import mapList
 from tweedr.lib.text import token_re, zip_boundaries
 from tweedr.ml.ark import TwitterNLP
 from tweedr.ml.crf.classifier import CRF

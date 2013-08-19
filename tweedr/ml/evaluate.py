@@ -7,7 +7,7 @@ from sklearn import cross_validation  # , metrics
 # from sklearn.feature_extraction import text
 
 from tweedr.lib.text import gloss
-from tweedr.models import DBSession, TokenizedLabel, Label
+from tweedr.models import DBSession, TokenizedLabel
 from tweedr.ml import compare_labels  # print_metrics_summary
 from tweedr.ml.crf.classifier import CRF
 from tweedr.ml.features import crf_feature_functions, featurize
@@ -74,15 +74,15 @@ def main():
     #    tweet=Tornado Kills 89 in Missouri. http://t.co/IEuBas5 token_type=i18 token= 89 id=5>
     # Train and test must be iterables of objects that support CRF-ready
     # .tokens and .labels attributes.
-    query = DBSession.query(TokenizedLabel).limit(opts.max_data)
+    query = DBSession.query(TokenizedLabel).\
+        filter(TokenizedLabel.tweet is not None).\
+        filter(TokenizedLabel.tweet != '').\
+        limit(opts.max_data)
     X_y = ((featurize(item.tokens, crf_feature_functions), item.labels) for item in query)
     # unzip and flatten into static list
     X, y = zip(*X_y)
     # we need to read X multiple times, so make sure it's all static
     X = map(flatMap, X)
-
-    categories = dict((label.id, label.text) for label in DBSession.query(Label))
-    print 'categories', categories
 
     N = len(y)
     for train_indices, test_indices in cross_validation.KFold(N, opts.k_folds, shuffle=True):

@@ -1,206 +1,99 @@
-# each feature function takes an N-long document (list of strings) and returns an N-long list
-#   of lists/tuples of features (i.e., strings) to add to the total data for that sentence.
-#   often the list will contain lists that are 1-long
-import os
-import requests
-from tweedr.ml import spotlight, wordnet, lexicon_list
-from tweedr.lib.text import zip_boundaries
-from itertools import izip, chain
+# import os
+import argparse
+from colorama import Fore
 
-spotlight_annotate_url = '%s/rest/annotate' % os.environ.get('SPOTLIGHT', 'http://spotlight.sztaki.hu:2222')
+from sklearn import cross_validation  # , metrics
+# from sklearn.pipeline import Pipeline
+# from sklearn.feature_extraction import text
 
+from tweedr.lib.text import gloss
+from tweedr.models import DBSession, TokenizedLabel
+from tweedr.ml import compare_labels  # print_metrics_summary
+from tweedr.ml.crf.classifier import CRF
+from tweedr.ml.features import crf_feature_functions, featurize
 
-def spacer(xs):
-    return [' '.join(xs)]
+import logging
+logger = logging.getLogger(__name__)
 
-
-def unigrams(document):
-    return [[token] for token in document]
-
-
-def rbigrams(document):
-    grams = zip(document, document[1:] + ['$$$'])
-    return map(spacer, grams)
+flatMap = lambda iterable: map(list, iterable)
 
 
-def lbigrams(document):
-    grams = zip(['^^^'] + document[:-1], document)
-    return map(spacer, grams)
+def evaluateSequenceClassifier(classifier, train_X, train_y, test_X, test_y, print_gloss=False):
+    '''If you use print_gloss, your test_y better be lists, not iterables.'''
+    logger.info('Training on %d, testing on %d', len(train_y), len(test_y))
+    classifier.fit(train_X, train_y)
+    predicted_y = classifier.predict(test_X)
 
+    if print_gloss:
+        for tokens_features, gold_labels, predicted_labels in zip(test_X, test_y, predicted_y):
+            print '-' * 80
+            # hope that the first feature string is the unigram!
+            tokens = [token_features[0] for token_features in tokens_features]
+            print gloss(zip(tokens, gold_labels, predicted_labels),
+                prefixes=(Fore.WHITE, Fore.YELLOW, Fore.BLUE),
+                postfixes=(Fore.RESET, Fore.RESET, Fore.RESET))
 
-def ctrigrams(document):
-    grams = zip(['^^^'] + document[:-1], document, document[1:] + ['$$$'])
-    return map(spacer, grams)
+    # flatten
+    test_y = sum(test_y, [])
+    predicted_y = sum(predicted_y, [])
+    counts = compare_labels(test_y, predicted_y, 'None')
+    print 'counts', counts
 
+    # sklearn metrics doesn't like string labels.
+    # used_labels = list(set(gold_labels + predicted_labels))
+    # print 'used_labels', used_labels
+    # lookup = dict((label, index) for index, label in enumerate(used_labels))
+    # print 'lookup', lookup
+    # remap to integers
+    # gold_labels = [lookup[gold_label] for gold_label in gold_labels]
+    # predicted_labels = [lookup[predicted_label] for predicted_label in predicted_labels]
 
-def plural(document):
-    return [['PLURAL'] if token.endswith('s') else [] for token in document]
+    # print_metrics_summary(gold_labels, predicted_labels)
+    # classification_report requires numeric labels, apparently?
+    # print metrics.classification_report(gold_labels, predicted_labels)
 
-
-def is_transportation(document):
-    return [['TRANSPORTATION'] if token in lexicon_list.transportation else [] for token in document]
-
-
-def is_building(document):
-    return [['BUILDING'] if token in lexicon_list.buildings else [] for token in document]
-
-
-def capitalized(document):
-    return [['CAPITALIZED'] if token[0].isupper() else [] for token in document]
-
-
-def numeric(document):
-    return [['NUMERIC'] if token.isdigit() else [] for token in document]
-
-
-def includes_numeric(document):
-    return[['INCLUDES_NUMERIC'] if contains_digits(token) else [] for token in document]
-
-
-def unique(document):
-    seen = {}
-    features = []
-    for token in document:
-        features.append(['UNIQUE'] if token not in seen else [])
-        seen[token] = 1
-    return features
-
-
-def hypernyms(document, recursive=True, depth=1):
-    '''Iterate through all senses for all 1-away hypernyms. E.g.:
-
-        print map(list, hypernyms(document))
-    '''
-    for token in document:
-        yield wordnet.token_hypernyms(token, recursive, depth)
-
-
-def get_pos(offset, document):
-    doc_joined = " ".join(document)
-    beginning = doc_joined[:offset]
-    length = len(beginning.split(" ")) - 1
-    return length
-
-
-def contains_digits(string):
-    for char in list(string):
-        if char.isdigit():
-            return True
-            break
-    return False
-
-
-def dbpedia_features(document):
-    doc_length = len(document)
-    doc_joined = " ".join(document)
-    positions = [[] for x in xrange(doc_length)]
-    try:
-        annotations = spotlight.annotate('http://tweedr.dssg.io:2222/rest/annotate', doc_joined, confidence=0.4, support=20)
-        for a in annotations:
-            offset = a["offset"]
-            type = a["types"]
-            all_types = type.split(",")
-            dbpedia_type = all_types[0]
-            pos = get_pos(offset, document)
-            db = str(dbpedia_type)
-            positions[pos] = [db.upper()]
-    except Exception:
-        return positions
-    return positions
-
-
-def dbpedia_spotlight(document, confidence=0.1, support=10):
-    document_string = u' '.join(document).encode('utf8')
-    r = requests.post(spotlight_annotate_url,
-        headers=dict(Accept='application/json'),
-        data=dict(text=document_string, confidence=confidence, support=support))
-    Resources = r.json()['Resources']
-    for token, token_start, token_end in zip_boundaries(document):
-        labels = []
-        for Resource in Resources:
-            entity_start = int(Resource['@offset'])
-            entity_end = entity_start + len(Resource['@surfaceForm'])
-
-            if entity_start <= token_start <= entity_end or entity_start <= token_end <= entity_end:
-                entity_uri = Resource['@URI']
-                entity_types = str(Resource['@types']).split(',')
-                labels += [entity_uri] + entity_types
-        yield labels
-
-
-crf_feature_functions = [
-    unigrams,
-    plural,
-    is_transportation,
-    is_building,
-    capitalized,
-    numeric,
-    unique,
-    hypernyms,
-    dbpedia_features,
-    includes_numeric,
-
-]
-
-all_feature_functions = crf_feature_functions + [
-    rbigrams,
-    lbigrams,
-    ctrigrams,
-]
-
-classifier_feature_functions = [
-    unigrams,
-]
-
-
-def featurize_adjacent(tokens, feature_functions):
-    feature_functions_results = [feature_function(tokens) for feature_function in feature_functions]
-    list_of_token_features = []
-    #add token features
-    for token_featuress in izip(*feature_functions_results):
-        list_of_token_features.append(list(chain.from_iterable(token_featuress)))
-    #add features to the left and to the right
-    i = 0
-    while i < len(list_of_token_features):
-        j = list_of_token_features[i]
-        it = [k for k in j]
-        if i > 0:
-            a = list_of_token_features[i - 1]
-            c = ['^^^' + k for k in a]
-            c.pop(0)
-            it += c
-
-        if i < len(list_of_token_features) - 1:
-            b = list_of_token_features[i + 1]
-            d = ['$$$' + k for k in b]
-            d.pop(0)
-            it += d
-        i = i + 1
-        yield chain.from_iterable([it])
-
-
-def featurize(tokens, feature_functions):
-    '''Take a N-long list of strings (natural text), apply each feature function,
-    and then unzip (transpose) and flatten so that we get a N-long list of
-    arbitrarily-long lists of strings.
-    '''
-    feature_functions_results = [feature_function(tokens) for feature_function in feature_functions]
-    for token_featuress in izip(*feature_functions_results):
-        yield chain.from_iterable(token_featuress)
+    precision = float(counts.true_positives) / (counts.true_positives + counts.false_positives)
+    recall = float(counts.true_positives) / (counts.true_positives + counts.false_negatives)
+    fscore = 2 * (precision * recall / (precision + recall))
+    for name, value in [('Precision', precision), ('Recall', recall), ('F-score', fscore)]:
+        print '%s: %.4f' % (name, value)
 
 
 def main():
-    # example usage:
-    # echo "The Fulton County Grand Jury said Friday an investigation of Atlanta's recent primary election produced no evidence that any irregularities took place." | python features.py
-    import sys
-    from tweedr.lib.text import token_re
-    for line in sys.stdin:
-        # tokenize the document on whitespace
-        tokens = token_re.findall(line)
-        # apply all feature functions
-        tokens_features = featurize(tokens, all_feature_functions)
-        for i, token_features in enumerate(tokens_features):
-            print i, list(token_features)
+    parser = argparse.ArgumentParser(
+        description='Train CRFSuite on data from the QCRI MySQL database',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-k', '--k-folds',
+        type=int, default=10, help='How many folds of the data to test on')
+    parser.add_argument('--max-data',
+        type=int, default=10000, help='Maximum data points to train and test on')
+    opts = parser.parse_args()
+
+    # e.g., tokenized_label =
+    # <TokenizedLabel dssg_id=23346 token_start=13 token_end=16
+    #    tweet=Tornado Kills 89 in Missouri. http://t.co/IEuBas5 token_type=i18 token= 89 id=5>
+    # Train and test must be iterables of objects that support CRF-ready
+    # .tokens and .labels attributes.
+    query = DBSession.query(TokenizedLabel).\
+        filter(TokenizedLabel.tweet is not None).\
+        filter(TokenizedLabel.tweet != '').\
+        limit(opts.max_data)
+    X_y = ((featurize(item.tokens, crf_feature_functions), item.labels) for item in query)
+    # unzip and flatten into static list
+    X, y = zip(*X_y)
+    # we need to read X multiple times, so make sure it's all static
+    X = map(flatMap, X)
+
+    N = len(y)
+    for train_indices, test_indices in cross_validation.KFold(N, opts.k_folds, shuffle=True):
+        # train, test = tokenized_labels[train_indices], tokenized_labels[test_indices]
+        train_X = [X[i] for i in train_indices]
+        train_y = [y[i] for i in train_indices]
+        test_X = [X[i] for i in test_indices]
+        test_y = [y[i] for i in test_indices]
+        classifier = CRF()
+        # print_gloss=True
+        evaluateSequenceClassifier(classifier, train_X, train_y, test_X, test_y)
 
 if __name__ == '__main__':
     main()

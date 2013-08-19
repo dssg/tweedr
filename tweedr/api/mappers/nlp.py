@@ -49,7 +49,6 @@ class SequenceTagger(Mapper):
 
         # tokens_features = map(list, featurize(tokens, crf_feature_functions))
         tokens_features = featurize(tokens, crf_feature_functions)
-        # print 'tokens_features', mapList(tokens_features)
 
         null_label = 'None'
         labels = self.crf.predict([tokens_features])[0]

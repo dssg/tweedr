@@ -1,10 +1,12 @@
+import os
+import itertools
+import requests
 from tweedr.api.mappers import Mapper
 from tweedr.api.protocols import TweetDictProtocol
 from tweedr.lib.text import token_re, zip_boundaries
+from tweedr.ml import features
 from tweedr.ml.ark import TwitterNLP
 from tweedr.ml.crf.classifier import CRF
-from tweedr.ml import features
-import itertools
 
 import logging
 logger = logging.getLogger(__name__)
@@ -78,5 +80,44 @@ class SequenceTagger(Mapper):
                     'start': starts[0],
                     'end': ends[-1],
                 })
+
+        return tweet
+
+
+class DBpediaSpotter(Mapper):
+    INPUT = TweetDictProtocol
+    OUTPUT = TweetDictProtocol
+
+    def __init__(self, confidence=0.1, support=10):
+        self.annotate_url = '%s/rest/annotate' % os.environ.get('SPOTLIGHT', 'http://spotlight.sztaki.hu:2222')
+        self.confidence = confidence
+        self.support = support
+        logger.info('DBpediaSpotter initialized')
+
+    def __call__(self, tweet):
+        text = tweet['text']
+
+        if 'dbpedia' not in tweet:
+            tweet['dbpedia'] = []
+
+        r = requests.post(self.annotate_url,
+            headers=dict(Accept='application/json'),
+            data=dict(text=text, confidence=self.confidence, support=self.support))
+        Resources = r.json().get('Resources', [])
+
+        for Resource in Resources:
+            start = int(Resource['@offset'])
+            surface_form = Resource['@surfaceForm']
+            types = Resource['@types']
+
+            dbpedia_resource = {
+                'text': surface_form,
+                'start': start,
+                'end': start + len(surface_form),
+                'uri': Resource['@URI'],
+                'types': types.split(',') if types else [],
+            }
+
+            tweet['dbpedia'].append(dbpedia_resource)
 
         return tweet

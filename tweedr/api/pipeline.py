@@ -24,7 +24,7 @@ class Pipeline(object):
                     to_pipe.__class__.__name__, to_pipe.INPUT.__name__)
                 total_errors += 1
         if total_errors > 0:
-            raise TypeError('Pipeline types do not match!')
+            raise TypeError('Pipeline types do not match.')
         self.mappers = mappers
 
     def __call__(self, payload):
@@ -60,6 +60,7 @@ def main():
         similar.FuzzyTextCounter(),
         nlp.POSTagger(),
         nlp.SequenceTagger(),
+        nlp.DBpediaSpotter(),
         mappers.LineStream(sys.stdout),
     )
 

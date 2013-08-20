@@ -69,7 +69,7 @@ def main():
         for i, line in enumerate(sys.stdin):
             pipeline(line)
     except KeyboardInterrupt:
-        logger.error('SIGINT received; Exiting.')
+        logger.critical('SIGINT received; Exiting.')
 
     logger.info('Processed %d lines', i)
     logger.debug('Pipeline exited')

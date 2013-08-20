@@ -3,7 +3,7 @@ from tweedr.api.protocols import TweetDictProtocol
 from tweedr.lib.text import token_re, zip_boundaries
 from tweedr.ml.ark import TwitterNLP
 from tweedr.ml.crf.classifier import CRF
-from tweedr.ml.features import crf_feature_functions, featurize
+from tweedr.ml import features
 import itertools
 
 import logging
@@ -39,8 +39,20 @@ class SequenceTagger(Mapper):
     INPUT = TweetDictProtocol
     OUTPUT = TweetDictProtocol
 
+    feature_functions = [
+        features.unigrams,
+        features.plural,
+        features.is_transportation,
+        features.is_building,
+        features.capitalized,
+        features.numeric,
+        features.unique,
+        features.hypernyms,
+        # features.dbpedia_spotlight,
+    ]
+
     def __init__(self):
-        self.crf = CRF.default()
+        self.crf = CRF.default(self.feature_functions)
         logger.info('SequenceTagger initialized')
 
     def __call__(self, tweet):
@@ -48,7 +60,7 @@ class SequenceTagger(Mapper):
         tokens = token_re.findall(text)
 
         # tokens_features = map(list, featurize(tokens, crf_feature_functions))
-        tokens_features = featurize(tokens, crf_feature_functions)
+        tokens_features = features.featurize(tokens, self.feature_functions)
 
         null_label = 'None'
         labels = self.crf.predict([tokens_features])[0]

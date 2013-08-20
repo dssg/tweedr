@@ -1,5 +1,8 @@
 {
-  "version": "0.0.3",
+  "version": "0.0.4",
+  "homepage": "https://github.com/dssg/tweedr",
+  "description": "Twitter-Informed Disaster Response",
+  "license": "MIT",
   "staticDependencies": {
     "jquery": "*",
     "underscore": "*",

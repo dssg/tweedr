@@ -26,7 +26,7 @@ See the [Project Overview](https://github.com/dssg/tweedr/wiki) for a more exten
 
     git clone https://github.com/dssg/tweedr.git
     cd tweedr
-    python setup.py develop install_data
+    python setup.py develop download_ext
 
 See [Deploy](https://github.com/dssg/tweedr/wiki/Deploy) on the [wiki](https://github.com/dssg/tweedr/wiki) for more help getting an instance of Tweedr up and running.
 

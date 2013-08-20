@@ -5,7 +5,8 @@ virtualenv:
   system_site_packages: true
 before_install:
   - "sudo apt-get update -qq"
-  - "sudo apt-get install -qq python-scipy"
+  - "sudo apt-get install -qq python-scipy python-nose"
+# python-numpy python-mako python-mysqldb python-scikits-learn python-sqlalchemy pep8
 env: MYSQL_HOST=dummyhost MYSQL_USER=dummyuser MYSQL_PASS=dummypass MYSQL_DATABASE=dummydatabase
 install: "pip install . --use-mirrors"
-script: "python setup.py nosetests -e no_ci"
+script: "python setup.py nosetests -e no_ci --with-doctest"

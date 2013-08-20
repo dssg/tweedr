@@ -32,6 +32,12 @@ def utf8str(s):
 
 
 def zip_boundaries(xs, space_len=1):
+    '''Take a list of strings and iterate through them along with boundary indices.
+
+    >>> tokens = 'Into the void .'.split()
+    >>> list(zip_boundaries(tokens))
+    [('Into', 0, 4), ('the', 5, 8), ('void', 9, 13), ('.', 14, 15)]
+    '''
     start = 0
     for x in xs:
         x_len = len(x)

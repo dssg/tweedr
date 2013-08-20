@@ -65,7 +65,8 @@ setup(
         'scipy',
         'sqlalchemy',
         'ujson',
-        'pyper'
+        'pylab',
+        'pyper',
     ],
     entry_points={
         'console_scripts': [

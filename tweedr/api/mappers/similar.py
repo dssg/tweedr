@@ -45,9 +45,9 @@ class FuzzyTextCounter(Mapper):
         self.threshold = threshold
         logger.debug('Simhash counter initialized with threshold of %0.3f', threshold)
 
-        # list of all simhash objects
+        # list of all processed simhash objects
         self.simhashes = []
-        # store is a lookup from a simhash hex to the original's id
+        # votes is a lookup from a simhash hex to the original's id
         self.votes = dict()
 
     def __call__(self, dict_):
@@ -64,9 +64,9 @@ class FuzzyTextCounter(Mapper):
                 sum_other_votes += other_votes
 
         # should self.votes be elevated based on fuzzy_count?
-        self.votes[self_simhash.hash] = 0
+        self.votes[self_simhash.hash] = self.votes.get(self_simhash.hash, 0) + 1
 
-        # we should probably normalize based on the number of total votes
+        # maybe normalize based on the number of total votes?
         dict_['fuzzy_count'] = fuzzy_count
         dict_['fuzzy_votes'] = sum_other_votes
 

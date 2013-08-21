@@ -3,7 +3,7 @@ import tempfile
 import crfsuite
 from tweedr.ml.crf import ItemSequence
 from tweedr.ml.classifier import ClassifierI
-from tweedr.ml.features import crf_feature_functions, featurize
+from tweedr.ml.features import featurize
 
 from itertools import izip
 
@@ -26,7 +26,7 @@ class CRF(ClassifierI):
         # For a CRF, X is an iterable of lists of lists of features (=strings)
         # and y is a list of list of token labels (=strings)
         for features_iter, labels in zip(X, y):
-            items = ItemSequence(features_iter)
+            items = ItemSequence(features_iter, check=True)
             self.trainer.append(items, tuple(labels), 0)
 
         self.model_filepath = tempfile.NamedTemporaryFile(delete=False).name
@@ -42,9 +42,9 @@ class CRF(ClassifierI):
     def predict(self, X):
         y = []
         for features_iter in X:
-            # maybe use predict_one instead?
-            items = ItemSequence(features_iter)
-            # just die if self.tagger has not been set
+            # maybe use self.predict_one(features_iter) instead?
+            items = ItemSequence(features_iter, check=True)
+            # this will just die if self.tagger has not been set
             self.tagger.set(items)
             # could also run self.probability() and self.marginal()
             # convert tuple (output of viterbi()) to list
@@ -58,7 +58,7 @@ class CRF(ClassifierI):
 
     # additional fields below are not required by ClassifierI
     def predict_one(self, features_iter):
-        items = ItemSequence(features_iter)
+        items = ItemSequence(features_iter, check=True)
         self.tagger.set(items)
         return list(self.tagger.viterbi())
 
@@ -84,13 +84,10 @@ class CRF(ClassifierI):
         return crf
 
     @classmethod
-    def from_data(cls, data):
-        '''
-        data must be iterables of objects that support CRF-ready (byte strings)
-        .tokens and .labels attributes.
-        '''
+    def from_data(cls, data, feature_functions):
+        '''data must be an iterable of objects with .tokens and .labels attributes.'''
         crf = cls()
-        X_y = ((featurize(datum.tokens, crf_feature_functions), datum.labels) for datum in data)
+        X_y = ((featurize(datum.tokens, feature_functions), datum.labels) for datum in data)
         X, y = izip(*X_y)
         # X (and y) are iterables, by the way
 
@@ -100,7 +97,7 @@ class CRF(ClassifierI):
         return crf
 
     @classmethod
-    def default(cls, retrain=False, limit=10000):
+    def default(cls, feature_functions, retrain=False, limit=10000):
         # Is it messy to have this method here, since it depends on tweedr.models.*?
         # and on a specific filepath in the local filesystem?
         model_filepath = '/tmp/tweedr.ml.crf.classifier-max%d.model' % limit
@@ -109,6 +106,6 @@ class CRF(ClassifierI):
         else:
             from tweedr.models import DBSession, TokenizedLabel
             query = DBSession.query(TokenizedLabel).limit(10000)
-            crf = cls.from_data(query)
+            crf = cls.from_data(query, feature_functions)
             crf.save(model_filepath)
             return crf

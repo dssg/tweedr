@@ -1,8 +1,12 @@
 \documentclass{article}
 
+\usepackage{color}
 \usepackage{fullpage}
 \usepackage{multicol}
+\usepackage{multirow}
 \usepackage{outline}
+
+\newcommand{\FIXME}[1]{\textcolor{blue}{[\textbf{FIXME}: {#1}]}}
 
 \twocolumn
 
@@ -32,6 +36,84 @@
   \item Summary statistics (number labeled/unlabeled; number of each class; number by disaster)
 \end{outline}
 
+We identified 12 crisis events that occurred in North America since the
+founding of Twitter in 2006. We then constructed queries to collect relevant
+tweets from Gnip, a social media aggregation company. We constructed two types
+of queries: (1) keyword ({\bf kw}) queries contain search terms and hashtags
+determined to be relevant based on a post-hoc analysis; (2) geographical
+queries ({\bf geo}) consisting of a bounding box of coordinates around the
+epicenter of the event. Table \ref{tab.data_summary} lists the number of
+tweets collected for each event.
+
+In a real-world deployment, it may be difficult to manually construct a list
+of keywords relevant to a disaster, but we leave this for future work.
+
+\begin{table*}
+\centering
+\small
+\begin{tabular}{|l|r|r|r| p{8cm} |}
+\hline
+{\bf Event}  & {\bf N (kw)} & {\bf N (geo)} & {\bf total} & {\bf keywords} \\
+\hline
+christchurch &  759,399  & 2,017       &  761,416    & \#EQNZ,\#CHCH,\#NZquake,Christchurch\\
+ike          &  113,773  & 3,989       &  117,762    & Hurricane+Ike,Hurricane,Ike,Galveston,Houston\\
+irene        &  384,689  & 3,871,631   &  4,256,320  & \#Hurricane,\#Irene,\#Tropics\\
+moore        &  842,318  & 1,579,056   &  2,421,374  & \#mooretornado,\#moore,newcastle\\
+oklahoma     & 1,697,891 & 6,209,510   &  7,907,401  & \#oklahoma,\#tornado,\#oklahomatornado,\#okwx,\#okc\\
+samoa        & 235,208   &  2,016      &  237,224    &  Samoa,tsunami,earthquake\\
+slavelake    & 45,072    &  1,281      &  46.353     & \#SlaveLake,Slave+Lake\\
+supertuesday & 22,205    &  2,201      &  24,406     & Super+Tuesday,Jackson,Memphis,supertuesday\\
+tornado2011a & 476,730   &  2,293      &  479,023    & Tushka,oklahoma,okwx,arkansas,akwx,tornado\\
+tornado2011b & 52,201    &  2,326      &  54,527     & \#alwx,\#okwx,\#txwx,\#tristatewx,tornado,\mbox{\#ALNeeds}, \#ALHaves,\#WeAreAlabama\\
+vtech        & 16,652    &  2,869      &  19,521     & \#vatech,\#virginiatech,\#hokies,\#vtech,\#vt\\
+westtx       & 651,045   &  178,846    &  829,891    & \#WestExplosion,\#WestTX\\
+\hline
+{\bf Total}  & {\bf 5,297,183} & {\bf 11,858,035}  & {\bf 17,155,218}  &\\
+\hline
+\end{tabular}
+\caption{Number of tweets collected by event. We query for tweets both by
+  keyword ({\bf kw}) and geographical bounding box ({\bf geo}).\FIXME{Sort by
+    year or size?}\label{tab.data_summary}}
+% See dssg-twitter-disaster/aron/count_lines.py
+\end{table*}
+
+\subsection{Data Annotation}
+To train and evaluate our automated methods, we must first collect
+human-annotated examples. We consider two tasks for annotation:
+\begin{enumerate}
+  \item {\bf Classification}: Does the tweet mention either specific
+    infrastructure damage or human casualty? We treat this as a binary
+    classification task. Positive examples include ``10 injured in plant
+    explosion'' and ``The windows are smashed at the Whole Foods on 1st'';
+    however, ``Hurricane Irene causes massive damage'' would be a negative
+    example, since it does not include specific, actionable damage
+    information.
+  \item {\bf Extraction}: For positive examples of the above, identify the
+    tokens in the tweet corresponding to specific types of infrastructure
+    damage or counts of the number of dead or injured. For example, in the
+    tweet ``Flooding bad up and down sides of Green River Rd,'' the token
+    ``Flooding'' should be annotated as a damage type, and the tokens ``Green
+    River Rd'' should be labeled as a road. The full ontology is listed in
+    Table \FIXME{add}.
+\end{enumerate}
+
+Since not all data can be labeled manually, we sample a small subset. Half of
+the tweets are selected uniformly at random from each event; the remaining
+half are sampled from tweets matching a set of keywords heuristically
+determined to be relevant to our task.\footnote{The keywords are: bridge,
+  intersection, car, bus, truck, vehicle, evacuation, evacuate, fire, police,
+  institution, wind, impact, injured, damage, road, airplane, hospital,
+  school, home, building, flood, collapse, death, casualty, missing.} We do
+this to mitigate the class imbalance problem (i.e., most tweets are not
+relevant to infrastructure damage or casualties).
+
+We sampled 1,049 tweets of the resulting tweets, of which 793 were labeled as
+positive examples. We then annotate the extraction labels for each positive
+example.
+% mysql> select count(*) from DamageClassification where mturk_code='QCRI';
+% 1049
+% mysql> select count(*) from DamageClassification where mturk_code='QCRI' and Infrastructure=1 or Casualty=1;
+% 793
 
 
 \section{Methods}
@@ -41,6 +123,12 @@
   \item Extraction
 \end{outline}
 
+
+\subsection{Classification}
+
+\subsection{Clustering}
+
+\subsection{Extraction}
 
 
 
@@ -132,4 +220,13 @@ xxxx\\
   \item Summarize next steps
 \end{outline}
 
+\section{Acknowledgements}
+This work was performed during the 2013 Eric \& Wendy Schmidt Data Science for
+Social Good Fellowship at the University of Chicago, in partnership with the
+Qatar Computational Research Institute. We are greatful to Gnip for providing
+access to the historical tweets used in this analysis, as well as to all the
+2013 DSSG Fellows who helped with data annotation.
+
 \end{document}
+
+

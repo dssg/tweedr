@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 from tweedr.lib.text import whitespace_unicode_translations
@@ -104,6 +105,6 @@ class LineStream(Mapper):
 
     def __call__(self, dict_):
         json.dump(dict_, self.stream)
-        self.stream.write('\n')
+        self.stream.write(os.linesep)
         # flush might be unnecessary in production
         self.stream.flush()

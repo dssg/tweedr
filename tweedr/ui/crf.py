@@ -23,7 +23,7 @@ app = bottle.Bottle()
 
 # globals are messy, but we don't to retrain a tagger for every request
 logger.debug('initializing %s (training or loading CRF using defaults)', __name__)
-GLOBALS = dict(tagger=CRF.default())
+GLOBALS = dict(tagger=CRF.default(crf_feature_functions))
 
 
 @app.get('/')
@@ -72,7 +72,7 @@ def tagger_tag():
 
 @app.route('/tagger/retrain')
 def tagger_retrain():
-    GLOBALS['tagger'] = CRF.default(retrain=True)
+    GLOBALS['tagger'] = CRF.default(crf_feature_functions, retrain=True)
     return dict(success=True)
 
 

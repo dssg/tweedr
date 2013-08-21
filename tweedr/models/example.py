@@ -20,6 +20,6 @@ def first(limit):
         token_type_object = tokenized_label.token_type_object
         print token_type_object.id, '\t', token_type_object.text, '\t', tokenized_label_text
 
-first(1000)
-
-# py example.py | awk -F\\t '{print $1,$2}' | sort | uniq -c | sort -g
+if __name__ == '__main__':
+    # py example.py | awk -F\\t '{print $1,$2}' | sort | uniq -c | sort -g
+    first(1000)

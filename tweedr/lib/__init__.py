@@ -6,6 +6,10 @@ import subprocess
 from copy import copy
 
 
+def mapList(iterable):
+    return map(list, iterable)
+
+
 def stderr(s):
     sys.stderr.write(s)
     sys.stderr.flush()

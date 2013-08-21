@@ -108,8 +108,9 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'tweedr-ui = tweedr.ui:main',
-            'tweedr-pipeline = tweedr.api.pipeline:main',
+            'tweedr-ui = tweedr.cli.ui:main',
+            'tweedr-database = tweedr.cli.database:main',
+            'tweedr-pipeline = tweedr.cli.pipeline:main',
         ],
     },
     cmdclass={

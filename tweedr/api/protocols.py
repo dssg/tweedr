@@ -1,5 +1,3 @@
-
-
 class StringProtocol(object):
     pass
 

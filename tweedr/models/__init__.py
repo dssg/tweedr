@@ -21,6 +21,10 @@ __all__ = ['DamageClassification', 'TokenizedLabel', 'UniformSample', 'Label', '
 
 
 class DamageClassification(DamageClassification):
+    # DamageClassification does not actually have a single FK, but references multiple tables.
+    # so this join is actually way more complicated
+    # tweet_object = orm.relationship(Tweet, lazy='join',
+        # primaryjoin=orm.foreign(DamageClassification.DSSG_ID) == Tweet.dssg_id)
 
     @property
     def text(self):

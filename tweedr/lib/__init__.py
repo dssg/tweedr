@@ -52,6 +52,13 @@ def iglob(pattern, root='.'):
             yield filepath
 
 
+def globfirst(pattern, root='.'):
+    try:
+        return iglob(pattern, root).next()
+    except StopIteration:
+        return None
+
+
 def walk(top, *predicates):
     # predicate(filepath) must be True for each predicate, for each filepath to be returned
     for dirpath, dirnames, filenames in os.walk(top):

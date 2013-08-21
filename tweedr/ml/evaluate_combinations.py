@@ -31,8 +31,8 @@ def evaluateSequenceClassifier(classifier, train_X, train_y, test_X, test_y, pri
                 # hope that the first feature string is the unigram!
                 tokens = [token_features[0] for token_features in tokens_features]
                 print gloss(zip(tokens, gold_labels, predicted_labels),
-                fixes=(Fore.WHITE, Fore.YELLOW, Fore.BLUE),
-                postfixes=(Fore.RESET, Fore.RESET, Fore.RESET))
+                            fixes=(Fore.WHITE, Fore.YELLOW, Fore.BLUE),
+                            postfixes=(Fore.RESET, Fore.RESET, Fore.RESET))
 
         # flatten
         test_y = sum(test_y, [])
@@ -63,6 +63,7 @@ def evaluateSequenceClassifier(classifier, train_X, train_y, test_X, test_y, pri
     except IOError:
         pass
 
+
 def main():
     parser = argparse.ArgumentParser(
         description='Train CRFSuite on data from the QCRI MySQL database',
@@ -80,7 +81,7 @@ def main():
     # .tokens and .labels attributes.
     query = DBSession.query(TokenizedLabel).limit(opts.max_data)
 
-    for L in range(0, len(crf_feature_functions)+1):
+    for L in range(0, len(crf_feature_functions) + 1):
         for subset in itertools.combinations(crf_feature_functions, L):
             sub = list(subset)
             print sub
@@ -93,7 +94,7 @@ def main():
             print 'categories', categories
 
             N = len(y)
-            #tests on different data sets -> k folds is set to 10 right now 
+            #tests on different data sets -> k folds is set to 10 right now
             for train_indices, test_indices in cross_validation.KFold(N, opts.k_folds, shuffle=True):
                 train_X = [X[i] for i in train_indices]
                 train_y = [y[i] for i in train_indices]

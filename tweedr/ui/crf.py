@@ -7,7 +7,8 @@ from bottle import request, redirect, static_file, mako_view as view
 import tweedr
 from tweedr.lib.text import token_re
 from tweedr.ml.crf.classifier import CRF
-from tweedr.ml.features import crf_feature_functions, featurize
+from tweedr.ml.features import featurize
+from tweedr.ml.features.sets import crf_feature_functions
 from tweedr.models import DBSession, TokenizedLabel
 
 import logging

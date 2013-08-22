@@ -1,7 +1,10 @@
 import argparse
 import sys
 from tweedr.api import pipeline
-from tweedr.api.mappers import basic, similar, nlp
+from tweedr.api.mappers import basic, similar, nlp, ml
+from tweedr.corpora.qcri import a126730_datasource, a121571_datasource, a126728_datasource, a122047_datasource
+
+from sklearn import linear_model, naive_bayes, neighbors, svm
 
 import logging
 logger = logging.getLogger(__name__)
@@ -29,6 +32,12 @@ def main():
         nlp.POSTagger(),
         nlp.SequenceTagger(),
         nlp.DBpediaSpotter(),
+
+        ml.CorpusClassifier(a126730_datasource(), naive_bayes.MultinomialNB()),
+        ml.CorpusClassifier(a121571_datasource(), svm.SVC(gamma=2, C=1)),
+        ml.CorpusClassifier(a126728_datasource(), neighbors.KNeighborsClassifier(3)),
+        ml.CorpusClassifier(a122047_datasource(), linear_model.LogisticRegression()),
+
         basic.LineStream(sys.stdout),
     )
 

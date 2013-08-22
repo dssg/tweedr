@@ -1,6 +1,7 @@
 ## Tweedr Python package
 
 * [`api/`](api) contains the main "pipeline" command line tool
+* [`corpora/`](corpora) contains scripts for reading corpora into predictable data structures from various source formats.
 * [`emr/`](emr) contains scripts for running jobs on Elastic Map Reduce
 * [`lib/`](lib) holds miscellaneous helpers or basic text manipulation tools.
 * [`ml/`](ml) contains all the machine learning and natural language processing tools.

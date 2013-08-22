@@ -50,9 +50,24 @@ def featurize(tokens, feature_functions):
         yield chain.from_iterable(token_featuress)
 
 
+def featurize_to_dict(tokens, feature_functions):
+    '''Take a N-long list of strings (natural text), apply each feature function,
+    create N-long list of dicts with keys that are the names of feature functions,
+    and values that are the joined output of those functions.
+    '''
+    feature_functions_results = [feature_function(tokens) for feature_function in feature_functions]
+    for token_featuress in izip(*feature_functions_results):
+        token_feature_dict = dict()
+        for feature_function, token_features in zip(feature_functions, token_featuress):
+            token_feature_string = ' '.join(token_features)
+            if token_feature_string:
+                token_feature_dict[feature_function.__name__] = token_feature_string
+        yield token_feature_dict
+
+
 def main():
     # example usage:
-    # echo "The Fulton County Grand Jury said Friday an investigation of Atlanta's recent primary election produced no evidence that any irregularities took place." | python features.py
+    # echo "The Fulton County Grand Jury said Friday an investigation of Atlanta's recent primary election produced no evidence that any irregularities took place." | python __init__.py
     import sys
     from tweedr.lib.text import token_re
     from tweedr.ml.features.sets import all_feature_functions

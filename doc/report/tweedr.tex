@@ -5,6 +5,7 @@
 \usepackage{multicol}
 \usepackage{multirow}
 \usepackage{outline}
+\usepackage{url}
 
 \newcommand{\FIXME}[1]{\textcolor{blue}{[\textbf{FIXME}: {#1}]}}
 
@@ -116,20 +117,22 @@ example.
 % 793
 
 
-\section{Methods}
-\begin{outline}
-  \item Classification
-  \item Clustering
-  \item Extraction
-\end{outline}
-
-
 \subsection{Classification}
+We compare a number of standard classification algorithms, including
+$K$-nearest neighbors, decision trees, na\"ive Bayes, and logistic regression,
+as implemented in the {\tt scikit-learn} Python
+library.\footnote{\url{http://http://scikit-learn.org/}} We also compare with
+supervised latent Dirichlet allocation~\cite{blei10supervised}, for which we create a Python wrapper of the R {\tt lda} package.\footnote{\url{http://cran.r-project.org/web/packages/lda/}}
 
 \subsection{Clustering}
+We consider two different methods of approximate string matching: Bloom
+filters~\cite{bloom70space} and SimHash~\cite{charikar02similarity}.
+
 
 \subsection{Extraction}
-
+For extraction, we use a conditional random field (CRF)~\cite{sutton12intro}, as
+implemented by the {\tt CRFsuite}
+toolkit.\footnote{\url{http://www.chokkan.org/software/crfsuite/}}
 
 
 \section{Experiments}
@@ -227,6 +230,10 @@ Qatar Computational Research Institute. We are greatful to Gnip for providing
 access to the historical tweets used in this analysis, as well as to all the
 2013 DSSG Fellows who helped with data annotation.
 
+\bibliographystyle{abbrv}
+\bibliography{tweedr}
+
 \end{document}
+
 
 

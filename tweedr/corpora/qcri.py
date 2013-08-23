@@ -187,5 +187,12 @@ class a146281_datasource(CSVDatasouce):
 
 
 if __name__ == '__main__':
+    '''You may need to get these files from S3, something like:
+
+    mkdir -p ~/corpora/tweedr
+    cd ~/corpora/tweedr
+    s3cmd sync s3://qcri/joplin/labeled/ .
+    s3cmd sync s3://qcri/sandy/labeled/ .
+    '''
     for label, text in a121571_datasource():
         print label, '\t', text

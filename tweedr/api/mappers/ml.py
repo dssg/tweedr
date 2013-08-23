@@ -1,6 +1,6 @@
 from sklearn import feature_extraction, pipeline
 from tweedr.lib.text import token_re
-from tweedr.ml.features import featurize, characters, lexicons, ngrams
+from tweedr.ml.features import featurize, characters, lexicons, ngrams  # , nlp
 from tweedr.api.mappers import Mapper
 from tweedr.api.protocols import TweetDictProtocol
 
@@ -21,6 +21,7 @@ class CorpusClassifier(Mapper):
         characters.numeric,
         ngrams.unique,
         lexicons.hypernyms,
+        # nlp.pos_tags,
     ]
 
     def tokenizer(self, text):

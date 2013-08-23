@@ -1,5 +1,4 @@
 import os
-import sys
 from subprocess import Popen, PIPE
 
 import tweedr
@@ -65,20 +64,3 @@ class TwitterNLP(ClassifierI):
         parts = result.split('\t')
         # cut off the original input, which is parts[3]
         return parts[0:3]
-
-
-def main():
-    '''Example usage'''
-    if sys.stdin.isatty():
-        logger.error('You must pipe in a string')
-        exit(1)
-
-    tagger = TwitterNLP()
-
-    for line in sys.stdin:
-        print '[input]', line
-        tags = tagger.predict(line)
-        print '[output]', tags
-
-if __name__ == '__main__':
-    main()

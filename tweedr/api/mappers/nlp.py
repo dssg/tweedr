@@ -5,7 +5,7 @@ from tweedr.api.mappers import Mapper
 from tweedr.api.protocols import TweetDictProtocol
 from tweedr.lib.text import token_re, zip_boundaries
 from tweedr.ml.features import featurize, characters, dbpedia, lexicons, ngrams
-from tweedr.ml.ark import TwitterNLP
+from tweedr.ark.java import TwitterNLP
 from tweedr.ml.crf.classifier import CRF
 
 import logging

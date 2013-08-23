@@ -1,10 +1,9 @@
 <?php 
  header("Location:index.php");
-
-$username="dssg";
-$password="dssg2013";
-$database="QCRI";
-$link = mysql_connect('qcri.c5faqozfo86k.us-west-2.rds.amazonaws.com',$username,$password);
+$username="YOUR_USERNAME";
+$password="YOUR_PASSWORD";
+$database="YOUR_DATABASE";
+$link = mysql_connect('HOSTNAME',$username,$password);
 session_start();
 if (!$link) {
   die('Could not connect: ' . mysql_error());

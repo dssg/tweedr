@@ -35,11 +35,9 @@ Tweedr is a [Data Science for Social Good](http://dssg.io/) project, through a p
 
 If you want to jump straight to development, see the [Contributing](https://github.com/dssg/tweedr/wiki/Contributing) wiki page.
 
-Tweedr uses a number of external libraries and resources.
-
 ### Dependencies
 
-This is the dependency tree:
+Tweedr uses a number of external libraries and resources. This is the dependency tree:
 
 * [Tweedr](https://github.com/dssg/tweedr): Primarily python, on github
     - [crfsuite](http://www.chokkan.org/software/crfsuite/): C/C++, from source
@@ -125,12 +123,12 @@ This simply uses SQLAlchemy to un-reflect the database, by running `metadata.cre
 
 At this point, you should have tools like `tweedr-ui` and `tweedr-pipeline` on your `PATH`, and you can run each of those with the `--help` flag to view the usage messages.
 
-See [[Pipeline]] for a description of some of the fields that `tweedr-pipeline` adds.
+See [the API section](https://github.com/dssg/tweedr/wiki#tweedr-api-how-it-works) of the wiki for a description of some of the fields that `tweedr-pipeline` adds.
 
 
 ### Troubleshooting
 
-If your installation is still missing packages, see [[Manually Installing]].
+If your installation is still missing packages, see the [manually installing](https://github.com/dssg/tweedr/wiki/Manually-installing) page of the wiki.
 
 
 

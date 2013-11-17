@@ -11,6 +11,8 @@ Tweedr is a [Data Science for Social Good](http://dssg.io/) project, through a p
 
 ## Problem, solution, data
 
+![web app screenshot](https://raw.github.com/dssg/dssg.github.io/master/img/posts/tweedr-screenshot.png)
+
 * For an extensive discussion of the problem and proposed solution, [visit our wiki](https://github.com/dssg/tweedr/wiki).
 * Get start using the tweedr api, [check out our tutorial website](http://tokens.qcri.dssg.io/tweedrtutorial/).
 
@@ -131,8 +133,11 @@ See [the API section](https://github.com/dssg/tweedr/wiki#tweedr-api-how-it-work
 If your installation is still missing packages, see the [manually installing](https://github.com/dssg/tweedr/wiki/Manually-installing) page of the wiki.
 
 
+## Team
+![Team](https://raw.github.com/dssg/dssg.github.io/761993c24ea2991170ef64048115cb805f5f13fb/img/people/teams/tweedr.png)
 
-## Contact
+
+## Contributing to the project
 
 Want to get in touch? Found a bug? Open up a [new issue](https://github.com/dssg/tweedr/issues/new) or email us at [dssg-qcri@googlegroups.com](mailto:dssg-qcri@googlegroups.com).
 

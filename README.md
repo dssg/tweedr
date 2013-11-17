@@ -27,7 +27,7 @@ Tweedr is a [Data Science for Social Good](http://dssg.io/) project, through a p
 * [`tweedr/`](tweedr) contains the main Python app and functions as a Python package (e.g., `import tweedr`).
 
 
-## Quickstart
+## Installation guide
 
     git clone https://github.com/dssg/tweedr.git
     cd tweedr

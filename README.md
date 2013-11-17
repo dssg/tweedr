@@ -1,5 +1,7 @@
 # Tweedr: Twitter for Disaster Response
 
+<a href="http://www.qcri.com/"><img src="http://dssg.io/img/partners/qcri.png" width="400" align="right"></a>
+
 Tweedr makes information from social media more accessible to providers of disaster relief. There are two aspects to the application:
 
 1. An **API** / **pipeline** for applying _machine learning techniques_ and _natural language processing tools_ to analyze social media produced in response to a disaster.
@@ -7,7 +9,10 @@ Tweedr makes information from social media more accessible to providers of disas
 
 Tweedr is a [Data Science for Social Good](http://dssg.io/) project, through a partnership with the [Qatar Computational Research Institute](http://qcri.qa/).
 
-See the [Project Overview](https://github.com/dssg/tweedr/wiki) for a more extensive discussion of the problem and proposed solution or check out our [tutorial website](http://tokens.qcri.dssg.io/tweedrtutorial/).
+## Problem, solution, data
+
+* For an extensive discussion of the problem and proposed solution, [visit our wiki](https://github.com/dssg/tweedr/wiki).
+* Get start using the tweedr api, [check out our tutorial website](http://tokens.qcri.dssg.io/tweedrtutorial/).
 
 
 ## Project layout

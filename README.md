@@ -1,4 +1,4 @@
-# Tweedr: Twitter for Disaster Response
+# Tweedr: measuring disaster damage with tweets
 
 <a href="http://www.qcri.com/"><img src="http://dssg.io/img/partners/qcri.png" width="400" align="right"></a>
 
